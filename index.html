@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>МД Clicker</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="coin-container">
+            <img src="coin.png" alt="Coin" id="coin">
+            <div class="coin-count">Clicks: <span id="coin-count">0</span></div>
+        </div>
+
+        <div class="change-container">
+            <button id="change-coin">Изменить</button>
+            <div class="change-options" id="change-options">
+                <button class="coin-option" id="coin-option-1" data-coin="coin1.png">
+                    <img src="coin1.png" alt="Coin 1">
+                    <p>Coin 1</p>
+                    <span class="coin-count">Clicks: <span id="coin-count-1">0</span></span>
+                </button>
+                <button class="coin-option" id="coin-option-2" data-coin="coin2.png">
+                    <img src="coin2.png" alt="Coin 2">
+                    <p>Coin 2</p>
+                    <span class="coin-count">Clicks: <span id="coin-count-2">0</span></span>
+                </button>
+                <button class="coin-option" id="coin-option-3" data-coin="coin3.png">
+                    <img src="coin3.png" alt="Coin 3">
+                    <p>Coin 3</p>
+                    <span class="coin-count">Clicks: <span id="coin-count-3">0</span></span>
+                </button>
+                <button class="coin-option" id="coin-option-4" data-coin="coin4.png">
+                    <img src="coin4.png" alt="Coin 4">
+                    <p>Coin 4</p>
+                    <span class="coin-count">Clicks: <span id="coin-count-4">0</span></span>
+                </button>
+                <button id="back-button">Назад <-</button>
+            </div>
+        </div>
+
+        <div class="shop-container">
+            <button id="shop-button">Магазин</button>
+            <div class="shop-options" id="shop-options">
+                <div class="shop-item">
+                    <p>+1 Клик</p>
+                    <span class="shop-price" id="click-price">50</span>
+                    <button id="buy-click">Купить</button>
+                </div>
+                <button id="back-button-shop">Назад <-</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
