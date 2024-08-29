@@ -3,63 +3,94 @@ body {
     padding: 0;
     font-family: sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-    background-color: #f0f0f0;
-}
-
-.container {
-    display: flex;
     flex-direction: column;
     align-items: center;
+    min-height: 100vh;
+    background-color: #f000f0;
+}
+
+.hotbar-container {
+    width: 100%;
+    position: relative;
+    margin-bottom: 20px;
+    background-color: #f0f0f0; /* Цвет фона хот-бара */
+    border-radius: 10px; /* Закругленные углы */
+}
+
+.hotbar {
+    width: 0%;
+    height: 20px;
+    background-color: #4CAF50; /* Цвет хот-бара */
+    border-radius: 10px; /* Закругленные углы */
+    transition: width 0.3s ease; /* Плавный переход ширины */
+}
+
+.hotbar-value {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 16px;
+    color: #333;
+    font-weight: bold;
 }
 
 .coin-container {
     position: relative;
     margin-bottom: 20px;
+    text-align: center; /* Центрирование монеты */
 }
 
 #coin {
-    width: 80%;
-    max-width: 400px;
-    height: auto;
+    width: 100%;
+    max-width: 400px; /* Максимальная ширина монеты */
+    height: 200px;
     cursor: pointer;
+
     transition: opacity 0.2s ease;
+    margin-bottom: 150px; /* Отступ снизу */
 }
 
 .coin-count {
     position: absolute;
-    top: -30px;
+    top: -10px;
     left: 50%;
     transform: translateX(-50%);
     font-size: 24px;
-    color: #333;
+    color: white;
     font-weight: bold;
 }
 
-.change-container, .shop-container {
+.change-shop-container {
     display: flex;
     align-items: center;
+    margin-bottom: 20px; /* Отступ снизу */
+    gap: 10px; /* Расстояние между кнопками */
 }
 
 #change-coin, #shop-button {
     padding: 10px 20px;
-    margin-right: 10px;
     font-size: 16px;
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Закругленные углы */
 }
 
-#change-options, .shop-options {
+#shop-button img {
+    width: 30px;
+    height: 30px;
+}
+
+.change-options, .shop-options {
     display: none;
     position: absolute;
     background-color: #fff;
     border: 1px solid #ddd;
     padding: 10px;
     z-index: 1;
+    border-radius: 5px; /* Закругленные углы */
 }
 
 .coin-option {
@@ -69,6 +100,7 @@ body {
     padding: 10px;
     border: 1px solid #ddd;
     cursor: pointer;
+    border-radius: 5px; /* Закругленные углы */
 }
 
 .coin-option img {
@@ -85,6 +117,7 @@ body {
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Закругленные углы */
 }
 
 .shop-item {
@@ -98,11 +131,12 @@ body {
     font-weight: bold;
 }
 
-#buy-click {
+#buy-click, #buy-energy {
     padding: 8px 15px;
     font-size: 14px;
     background-color: #4CAF50;
     color: white;
     border: none;
     cursor: pointer;
+    border-radius: 5px; /* Закругленные углы */
 }

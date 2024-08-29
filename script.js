@@ -9,9 +9,16 @@ const shopOptions = document.getElementById('shop-options');
 const buyClickButton = document.getElementById('buy-click');
 const clickPrice = document.getElementById('click-price');
 const backButtonShop = document.getElementById('back-button-shop');
+const hotbar = document.getElementById('hotbar');
+const hotbarValue = document.getElementById('hotbar-value');
+const buyEnergyButton = document.getElementById('buy-energy');
+const energyPrice = document.getElementById('energy-price');
 
 let clicks = 0;
 let clickMultiplier = 1;
+let energy = 2000;
+let hotbarValueInt = 2000;
+let hotbarInterval;
 
 // Обработка клика на монету
 coin.addEventListener('click', () => {
@@ -19,8 +26,22 @@ coin.addEventListener('click', () => {
     setTimeout(() => {
         coin.style.opacity = 1;
     }, 100);
+
     clicks += clickMultiplier;
     coinCount.textContent = clicks;
+
+    // Анимация цифры 1
+    const clickAnimation = document.createElement('div');
+    clickAnimation.classList.add('click-animation');
+    clickAnimation.textContent = clickMultiplier;
+    coinCount.appendChild(clickAnimation);
+    setTimeout(() => {
+        clickAnimation.remove();
+    }, 500);
+
+    // Обновление хот-бара
+    hotbarValueInt -= clickMultiplier;
+    updateHotbar();
 });
 
 // Изменение монеты
@@ -39,7 +60,7 @@ coinOptions.forEach(option => {
         changeOptions.style.display = 'none';
 
         // Сброс счетчика для новой монеты
-        const coinCountElement = option.querySelector('.coin-count span');
+        const coinCountElement = option.querySelector('.coin-count');
         coinCountElement.textContent = 0;
     });
 });
@@ -58,9 +79,37 @@ buyClickButton.addEventListener('click', () => {
         clicks -= parseInt(clickPrice.textContent);
         clickMultiplier++;
         coinCount.textContent = clicks;
-        clickPrice.textContent = parseInt(clickPrice.textContent) * 2; 
+        clickPrice.textContent = parseInt(clickPrice.textContent) * 2;
     }
 });
+
+// Прокачка энергии
+buyEnergyButton.addEventListener('click', () => {
+    if (clicks >= parseInt(energyPrice.textContent)) {
+        clicks -= parseInt(energyPrice.textContent);
+        energy += 500;
+        hotbarValueInt += 500; // Увеличиваем хот-бар
+        updateHotbar();
+        energyPrice.textContent = parseInt(energyPrice.textContent) + 500;
+
+    }
+});
+
+// Обновление хот-бара
+function updateHotbar() {
+    hotbarValue.textContent = hotbarValueInt;
+    const hotbarPercentage = (hotbarValueInt / 2000) * 100; // 2500 - максимальное значение
+    hotbar.style.width = hotbarPercentage + '%';
+}
+
+// Регенерация хот-бара
+hotbarInterval = setInterval(() => {
+    if (hotbarValueInt < energy) { // Регенерация только если не максимальная
+
+      hotbarValueInt++;
+      updateHotbar();
+    }
+}, 1000);
 
 // Предотвращение зума на телефоне
 document.addEventListener('touchmove', (event) => {
