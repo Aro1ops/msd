@@ -1,122 +1,187 @@
-const coin = document.getElementById('coin');
-const coinCount = document.getElementById('coin-count');
-const changeCoinButton = document.getElementById('change-coin');
-const changeOptions = document.getElementById('change-options');
-const backButton = document.getElementById('back-button');
-const coinOptions = document.querySelectorAll('.coin-option');
-const shopButton = document.getElementById('shop-button');
-const shopOptions = document.getElementById('shop-options');
-const buyClickButton = document.getElementById('buy-click');
-const clickPrice = document.getElementById('click-price');
-const backButtonShop = document.getElementById('back-button-shop');
-const hotbar = document.getElementById('hotbar');
-const hotbarValue = document.getElementById('hotbar-value');
-const buyEnergyButton = document.getElementById('buy-energy');
-const energyPrice = document.getElementById('energy-price');
+document.addEventListener("DOMContentLoaded", () => {
+    const coinImage = document.getElementById("coin-image");
+    const clickCounter = document.getElementById("click-counter");
+    const energyFill = document.getElementById("energy-fill");
+    const energyLabel = document.getElementById("energy-label");
+    const changeButton = document.getElementById("change-button");
+    const storeButton = document.getElementById("store-button");
+    const changeMenu = document.getElementById("change-menu");
+    const storeMenu = document.getElementById("store-menu");
+    const backButton = document.getElementById("back-button");
+    const backStoreButton = document.getElementById("back-store-button");
+    const upgradeClickButton = document.getElementById("upgrade-click");
+    const upgradeEnergyButton = document.getElementById("upgrade-energy");
+    const reduceRegenerationButton = document.getElementById("reduce-regeneration");
+    const resetProgressButton = document.getElementById("reset-progress");
 
-let clicks = 0;
-let clickMultiplier = 1;
-let energy = 2000;
-let hotbarValueInt = 2000;
-let hotbarInterval;
+    let clickCounts = {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
 
-// Обработка клика на монету
-coin.addEventListener('click', () => {
-    coin.style.opacity = 0.5;
-    setTimeout(() => {
-        coin.style.opacity = 1;
-    }, 100);
+    let clickUpgrades = {
+        coin1: 1,
+        coin2: 1,
+        coin3: 1,
+        coin4: 1
+    };
 
-    clicks += clickMultiplier;
-    coinCount.textContent = clicks;
+    let regenUpgrades = {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
 
-    // Анимация цифры 1
-    const clickAnimation = document.createElement('div');
-    clickAnimation.classList.add('click-animation');
-    clickAnimation.textContent = clickMultiplier;
-    coinCount.appendChild(clickAnimation);
-    setTimeout(() => {
-        clickAnimation.remove();
-    }, 500);
+    let maxEnergy = 2000;
+    let energy = 2000;
+    let currentCoin = "coin1";
+    let regenTime = 10000; // 1 second by default
 
-    // Обновление хот-бара
-    hotbarValueInt -= clickMultiplier;
-    updateHotbar();
-});
+    function updateEnergyBar() {
+        energyFill.style.width = (energy / maxEnergy) * 100 + "%";
+        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    }
 
-// Изменение монеты
-changeCoinButton.addEventListener('click', () => {
-    changeOptions.style.display = 'block';
-});
+    function saveGame() {
+        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
+        localStorage.setItem("energy", energy);
+        localStorage.setItem("currentCoin", currentCoin);
+    }
 
-backButton.addEventListener('click', () => {
-    changeOptions.style.display = 'none';
-});
+    function loadGame() {
+        const savedClickCounts = localStorage.getItem("clickCounts");
+        const savedEnergy = localStorage.getItem("energy");
+        const savedCurrentCoin = localStorage.getItem("currentCoin");
 
-coinOptions.forEach(option => {
-    option.addEventListener('click', () => {
-        const newCoinImage = option.dataset.coin;
-        coin.src = newCoinImage;
-        changeOptions.style.display = 'none';
+        if (savedClickCounts) {
+            clickCounts = JSON.parse(savedClickCounts);
+        }
+        if (savedEnergy) {
+            energy = parseInt(savedEnergy);
+        }
+        if (savedCurrentCoin) {
+            currentCoin = savedCurrentCoin;
+            coinImage.src = currentCoin + ".png";
+        }
 
-        // Сброс счетчика для новой монеты
-        const coinCountElement = option.querySelector('.coin-count');
-        coinCountElement.textContent = 0;
+        clickCounter.textContent = clickCounts[currentCoin];
+        updateEnergyBar();
+    }
+
+    function incrementClicks() {
+        if (energy > 0) {
+            clickCounts[currentCoin] += clickUpgrades[currentCoin];
+            energy -= 1; // Decrease energy on click
+            clickCounter.textContent = clickCounts[currentCoin];
+            updateEnergyBar();
+            saveGame();
+
+            const animation = document.createElement("div");
+            animation.className = "click-animation";
+            animation.textContent = "+" + clickUpgrades[currentCoin];
+            document.body.appendChild(animation);
+            setTimeout(() => {
+                animation.remove();
+            }, 1000);
+        } else {
+            alert("Недостаточно энергии!");
+        }
+    }
+
+    coinImage.addEventListener("click", incrementClicks);
+
+    changeButton.addEventListener("click", () => {
+        changeMenu.classList.toggle("hidden");
     });
-});
 
-// Магазин
-shopButton.addEventListener('click', () => {
-    shopOptions.style.display = 'block';
-});
+    backButton.addEventListener("click", () => {
+        changeMenu.classList.add("hidden");
+    });
 
-backButtonShop.addEventListener('click', () => {
-    shopOptions.style.display = 'none';
-});
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.toggle("hidden");
+    });
 
-buyClickButton.addEventListener('click', () => {
-    if (clicks >= parseInt(clickPrice.textContent)) {
-        clicks -= parseInt(clickPrice.textContent);
-        clickMultiplier++;
-        coinCount.textContent = clicks;
-        clickPrice.textContent = parseInt(clickPrice.textContent) * 2;
-    }
-});
+    backStoreButton.addEventListener("click", () => {
+        storeMenu.classList.add("hidden");
+    });
 
-// Прокачка энергии
-buyEnergyButton.addEventListener('click', () => {
-    if (clicks >= parseInt(energyPrice.textContent)) {
-        clicks -= parseInt(energyPrice.textContent);
-        energy += 500;
-        hotbarValueInt += 500; // Увеличиваем хот-бар
-        updateHotbar();
-        energyPrice.textContent = parseInt(energyPrice.textContent) + 500;
+    upgradeClickButton.addEventListener("click", () => {
+        if (clickCounts[currentCoin] >= 50) {
+            clickCounts[currentCoin] -= 50;
+            clickUpgrades[currentCoin]++;
+            clickCounter.textContent = clickCounts[currentCoin];
+            saveGame();
+        }
+    });
 
-    }
-});
+    upgradeEnergyButton.addEventListener("click", () => {
+        if (clickCounts[currentCoin] >= 3000) {
+            clickCounts[currentCoin] -= 3000;
+            maxEnergy += 500;
+            energy = maxEnergy; // Restore energy to max
+            updateEnergyBar();
+            saveGame();
+        }
+    });
 
-// Обновление хот-бара
-function updateHotbar() {
-    hotbarValue.textContent = hotbarValueInt;
-    const hotbarPercentage = (hotbarValueInt / 2000) * 100; // 2500 - максимальное значение
-    hotbar.style.width = hotbarPercentage + '%';
-}
+    reduceRegenerationButton.addEventListener("click", () => {
+        if (clickCounts[currentCoin] >= 2000) {
+            clickCounts[currentCoin] -= 2000;
+            regenTime = Math.max(500, regenTime - 100); // Decrease regeneration time
+            saveGame();
+        }
+    });
 
-// Регенерация хот-бара
-hotbarInterval = setInterval(() => {
-    if (hotbarValueInt < energy) { // Регенерация только если не максимальная
+    document.querySelectorAll('.change-option').forEach(button => {
+        button.addEventListener('click', () => {
+            const newCoin = button.getAttribute('data-image');
+            currentCoin = newCoin.split('.')[0]; // Set currentCoin without extension
+            coinImage.src = newCoin;
+            saveGame();
+            clickCounter.textContent = clickCounts[currentCoin];
+        });
+    });
 
-      hotbarValueInt++;
-      updateHotbar();
-    }
-}, 1000);
+    resetProgressButton.addEventListener('click', () => {
+        if (confirm("Вы уверены, что хотите удалить весь прогресс? Это действие необратимо.")) {
+            localStorage.clear();
+            clickCounts = {
+                coin1: 0,
+                coin2: 0,
+                coin3: 0,
+                coin4: 0
+            };
+            clickUpgrades = {
+                coin1: 1,
+                coin2: 1,
+                coin3: 1,
+                coin4: 1
+            };
+            regenUpgrades = {
+                coin1: 0,
+                coin2: 0,
+                coin3: 0,
+                coin4: 0
+            };
+            maxEnergy = 2000;
+            energy = 2000;
+            currentCoin = "coin1";
+            clickCounter.textContent = clickCounts[currentCoin];
+            updateEnergyBar();
+            saveGame();
+        }
+    });
 
-// Предотвращение зума на телефоне
-document.addEventListener('touchmove', (event) => {
-    event.preventDefault();
-}, { passive: false });
+    setInterval(() => {
+        if (energy < maxEnergy) {
+            energy += 1;
+            updateEnergyBar();
+        }
+    }, Math.max(regenTime, 1000)); // Ensure the interval doesn't go below 1 second
 
-// Запрет прокрутки на мобильных устройствах
-document.addEventListener('touchstart', (event) => {
-    event.preventDefault();
+    loadGame();
 });

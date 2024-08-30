@@ -3,67 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Clicker</title>
+    <title>Clicker Game</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <div class="container">
-        <div class="hotbar-container">
-            <div class="hotbar" id="hotbar"></div>
-            <div class="hotbar-value" id="hotbar-value">2000</div>
-        </div>
-
-        <div class="coin-container">
-            <img src="coin.png" alt="Coin" id="coin">
-            <div class="coin-count" id="coin-count">0</div>
-        </div>
-
-        <div class="change-shop-container">
-            <button id="change-coin">Изменить</button>
-            <button id="shop-button">
-                <img src="shop.png" alt="Магазин" id="shop-icon">
-            </button>
-        </div>
-
-        <div class="change-options" id="change-options">
-            <button class="coin-option" id="coin-option-1" data-coin="coin1.png">
-                <img src="coin1.png" alt="Coin 1">
-                <p>Coin 1</p>
-                <span class="coin-count" id="coin-count-1">0</span>
-            </button>
-            <button class="coin-option" id="coin-option-2" data-coin="coin2.png">
-                <img src="coin2.png" alt="Coin 2">
-                <p>Coin 2</p>
-                <span class="coin-count" id="coin-count-2">0</span>
-            </button>
-            <button class="coin-option" id="coin-option-3" data-coin="coin3.png">
-                <img src="coin3.png" alt="Coin 3">
-                <p>Coin 3</p>
-                <span class="coin-count" id="coin-count-3">0</span>
-            </button>
-            <button class="coin-option" id="coin-option-4" data-coin="coin4.png">
-                <img src="coin4.png" alt="Coin 4">
-                <p>Coin 4</p>
-                <span class="coin-count" id="coin-count-4">0</span>
-            </button>
-            <button id="back-button">Назад <-</button>
-        </div>
-
-        <div class="shop-options" id="shop-options">
-            <div class="shop-item">
-                <p>+1 Клик</p>
-                <span class="shop-price" id="click-price">50</span>
-                <button id="buy-click">Купить</button>
-            </div>
-            <div class="shop-item">
-                <p>Прокачка Энергии</p>
-                <span class="shop-price" id="energy-price">3000</span>
-                <button id="buy-energy">Купить</button>
-            </div>
-            <button id="back-button-shop">Назад <-</button>
-        </div>
+    <div class="energy-bar">
+        <div id="energy-fill" class="energy-fill"></div>
+        <div id="energy-label" class="energy-label">2000 / 2000</div>
     </div>
-
+    <div id="click-counter">0</div>
+    <img id="coin-image" src="coin1.png" alt="Coin Image">
+    <button id="change-button">Изменить</button>
+    <button id="store-button">Магазин</button>
+    <div id="change-menu" class="hidden">
+        <button id="back-button">Назад ←</button>
+        <button class="change-option" data-image="coin1.png">
+            <img src="coin1.png" alt="Coin 1" width="50"> Монета 1
+        </button>
+        <button class="change-option" data-image="coin2.png">
+            <img src="coin2.png" alt="Coin 2" width="50"> Монета 2
+        </button>
+        <button class="change-option" data-image="coin3.png">
+            <img src="coin3.png" alt="Coin 3" width="50"> Монета 3
+        </button>
+        <button class="change-option" data-image="coin4.png">
+            <img src="coin4.png" alt="Coin 4" width="50"> Монета 4
+        </button>
+        <button id="reset-progress">Удалить прогресс</button>
+    </div>
+    <div id="store-menu" class="hidden">
+        <button id="upgrade-click">Прокачка кликов (+1) - 50</button>
+        <button id="upgrade-energy">Прокачка энергии (+500) - 3000</button>
+        <button id="reduce-regeneration">Уменьшение регенерации (на 0.1 сек) - 2000</button>
+        <button id="back-store-button">Назад ←</button>
+    </div>
+    <div id="daily-reward-timer">До награды: --:--:--</div>
     <script src="script.js"></script>
 </body>
 </html>

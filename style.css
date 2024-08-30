@@ -1,142 +1,101 @@
 body {
     margin: 0;
     padding: 0;
-    font-family: sans-serif;
     display: flex;
     flex-direction: column;
+    justify-content: center;
     align-items: center;
-    min-height: 100vh;
-    background-color: #f000f0;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
 }
 
-.hotbar-container {
-    width: 100%;
-    position: relative;
-    margin-bottom: 20px;
-    background-color: #f0f0f0; /* Цвет фона хот-бара */
-    border-radius: 10px; /* Закругленные углы */
-}
-
-.hotbar {
-    width: 0%;
-    height: 20px;
-    background-color: #4CAF50; /* Цвет хот-бара */
-    border-radius: 10px; /* Закругленные углы */
-    transition: width 0.3s ease; /* Плавный переход ширины */
-}
-
-.hotbar-value {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    font-size: 16px;
-    color: #333;
-    font-weight: bold;
-}
-
-.coin-container {
-    position: relative;
-    margin-bottom: 20px;
-    text-align: center; /* Центрирование монеты */
-}
-
-#coin {
-    width: 100%;
-    max-width: 400px; /* Максимальная ширина монеты */
-    height: 200px;
+#coin-image {
+    width: 80%; /* Coin now occupies most of the screen width */
+    height: auto;
     cursor: pointer;
-
-    transition: opacity 0.2s ease;
-    margin-bottom: 150px; /* Отступ снизу */
+    margin-top: 20px;
 }
 
-.coin-count {
+#click-counter {
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+.energy-bar {
+    width: 80%;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px; /* Rounded corners for energy bar */
+    overflow: hidden;
+    margin: 20px 0;
+    position: relative;
+}
+
+.energy-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #76c7c0;
+}
+
+.energy-label {
     position: absolute;
-    top: -10px;
+    top: 0;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 24px;
-    color: white;
     font-weight: bold;
 }
 
-.change-shop-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 20px; /* Отступ снизу */
-    gap: 10px; /* Расстояние между кнопками */
-}
-
-#change-coin, #shop-button {
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #4CAF50;
+button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
-    border-radius: 5px; /* Закругленные углы */
 }
 
-#shop-button img {
-    width: 30px;
-    height: 30px;
+button:hover {
+    background-color: #0056b3;
 }
 
-.change-options, .shop-options {
+.hidden {
     display: none;
+}
+
+.click-animation {
     position: absolute;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    padding: 10px;
-    z-index: 1;
-    border-radius: 5px; /* Закругленные углы */
-}
-
-.coin-option {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-    padding: 10px;
-    border: 1px solid #ddd;
-    cursor: pointer;
-    border-radius: 5px; /* Закругленные углы */
-}
-
-.coin-option img {
-    width: 50px;
-    height: 50px;
-    margin-right: 10px;
-}
-
-#back-button, #back-button-shop {
-    margin-top: 10px;
-    padding: 10px 20px;
-    font-size: 16px;
-    background-color: #f44336;
-    color: white;
-    border: none;
-    cursor: pointer;
-    border-radius: 5px; /* Закругленные углы */
-}
-
-.shop-item {
-    display: flex;
-    align-items: center;
-    margin-bottom: 10px;
-}
-
-.shop-price {
-    margin-right: 10px;
+    font-size: 1.5rem;
     font-weight: bold;
+    color: green;
+    pointer-events: none;
+    animation: clickAnim 1s forwards;
 }
 
-#buy-click, #buy-energy {
-    padding: 8px 15px;
-    font-size: 14px;
-    background-color: #4CAF50;
+@keyframes clickAnim {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
+
+.change-option {
+    
+    align-items: center;
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
     color: white;
     border: none;
+    border-radius: 5px;
     cursor: pointer;
-    border-radius: 5px; /* Закругленные углы */
+}
+
+.change-option img {
+    margin-right: 10px; /* Space between image and text */
 }
