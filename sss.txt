@@ -1,270 +1,3 @@
-To implement your requested features in your clicker game, we will modify the HTML, CSS, and JavaScript code to ensure that the coin buttons display images, allow for progress deletion with confirmation, and fix the energy regeneration issue. Here's how you can do it:
-
-### 1. Update HTML
-Add images to the coin buttons and an additional button for deleting progress:
-
-```html
-<div id="change-menu" class="hidden">
-    <button id="back-button">Назад ←</button>
-    <button class="change-option" data-image="coin1.png">
-        <img src="coin1.png" alt="Coin 1" width="50"> Монета 1
-    </button>
-    <button class="change-option" data-image="coin2.png">
-        <img src="coin2.png" alt="Coin 2" width="50"> Монета 2
-    </button>
-    <button class="change-option" data-image="coin3.png">
-        <img src="coin3.png" alt="Coin 3" width="50"> Монета 3
-    </button>
-    <button class="change-option" data-image="coin4.png">
-        <img src="coin4.png" alt="Coin 4" width="50"> Монета 4
-    </button>
-    <button id="reset-progress">Удалить прогресс</button>
-</div>
-```
-
-### 2. Update CSS
-You may want to style the coin buttons so the images fit well:
-
-```css
-.change-option {
-    display: flex;
-    align-items: center;
-    margin: 5px;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.change-option img {
-    margin-right: 10px; /* Space between image and text */
-}
-```
-
-### 3. Update JavaScript
-Add functionality for deleting progress and fixing the regeneration timer.
-
-#### a. Handle Coin Selection
-Modify the coin selection logic in the JavaScript:
-
-```javascript
-document.querySelectorAll('.change-option').forEach(button => {
-    button.addEventListener('click', () => {
-        const newCoin = button.getAttribute('data-image');
-        currentCoin = newCoin.split('.')[0]; // Set currentCoin without extension
-        coinImage.src = newCoin;
-        saveGame();
-        clickCounter.textContent = clickCounts[currentCoin];
-    });
-});
-```
-
-#### b. Add Progress Reset
-Add functionality for the reset button:
-
-```javascript
-document.getElementById('reset-progress').addEventListener('click', () => {
-    if (confirm("Вы уверены, что хотите удалить весь прогресс? Это действие необратимо.")) {
-        localStorage.clear();
-        clickCounts = {
-            coin1: 0,
-            coin2: 0,
-            coin3: 0,
-            coin4: 0
-        };
-        clickUpgrades = {
-            coin1: 1,
-            coin2: 1,
-            coin3: 1,
-            coin4: 1
-        };
-        regenUpgrades = {
-            coin1: 0,
-            coin2: 0,
-            coin3: 0,
-            coin4: 0
-        };
-        maxEnergy = 2000;
-        energy = 2000;
-        currentCoin = "coin1";
-        clickCounter.textContent = clickCounts[currentCoin];
-        updateEnergyBar();
-        saveGame();
-    }
-});
-```
-
-#### c. Fix Regeneration Logic
-Adjust the energy regeneration logic so it properly reflects the upgrades:
-
-```javascript
-setInterval(() => {
-    if (energy < maxEnergy) {
-        energy += 1;
-        updateEnergyBar();
-    }
-}, Math.max(regenTime, 1000)); // Ensure the interval doesn't go below 1 second
-```
-
-### Complete Code
-Here’s a complete version of your updated files:
-
-#### HTML
-```html
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clicker Game</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <div class="energy-bar">
-        <div id="energy-fill" class="energy-fill"></div>
-        <div id="energy-label" class="energy-label">2000 / 2000</div>
-    </div>
-    <div id="click-counter">0</div>
-    <img id="coin-image" src="coin1.png" alt="Coin Image">
-    <button id="change-button">Изменить</button>
-    <button id="store-button">Магазин</button>
-    <div id="change-menu" class="hidden">
-        <button id="back-button">Назад ←</button>
-        <button class="change-option" data-image="coin1.png">
-            <img src="coin1.png" alt="Coin 1" width="50"> Монета 1
-        </button>
-        <button class="change-option" data-image="coin2.png">
-            <img src="coin2.png" alt="Coin 2" width="50"> Монета 2
-        </button>
-        <button class="change-option" data-image="coin3.png">
-            <img src="coin3.png" alt="Coin 3" width="50"> Монета 3
-        </button>
-        <button class="change-option" data-image="coin4.png">
-            <img src="coin4.png" alt="Coin 4" width="50"> Монета 4
-        </button>
-        <button id="reset-progress">Удалить прогресс</button>
-    </div>
-    <div id="store-menu" class="hidden">
-        <button id="upgrade-click">Прокачка кликов (+1) - 50</button>
-        <button id="upgrade-energy">Прокачка энергии (+500) - 3000</button>
-        <button id="reduce-regeneration">Уменьшение регенерации (на 0.1 сек) - 2000</button>
-        <button id="back-store-button">Назад ←</button>
-    </div>
-    <div id="daily-reward-timer">До награды: --:--:--</div>
-    <script src="script.js"></script>
-</body>
-</html>
-```
-
-#### CSS
-```css
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
-}
-
-#coin-image {
-    width: 80%; /* Coin now occupies most of the screen width */
-    height: auto;
-    cursor: pointer;
-    margin-top: 20px;
-}
-
-#click-counter {
-    font-size: 2rem;
-    margin-top: 10px;
-}
-
-.energy-bar {
-    width: 80%;
-    height: 20px;
-    background-color: #ccc;
-    border-radius: 10px; /* Rounded corners for energy bar */
-    overflow: hidden;
-    margin: 20px 0;
-    position: relative;
-}
-
-.energy-fill {
-    width: 100%;
-    height: 100%;
-    background-color: #76c7c0;
-}
-
-.energy-label {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    font-weight: bold;
-}
-
-button {
-    margin: 5px;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover {
-    background-color: #0056b3;
-}
-
-.hidden {
-    display: none;
-}
-
-.click-animation {
-    position: absolute;
-    font-size: 1.5rem;
-    font-weight: bold;
-    color: green;
-    pointer-events: none;
-    animation: clickAnim 1s forwards;
-}
-
-@keyframes clickAnim {
-    0% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-    100% {
-        opacity: 0;
-        transform: translateY(-50px);
-    }
-}
-
-.change-option {
-    display: flex;
-    align-items: center;
-    margin: 5px;
-    padding: 10px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.change-option img {
-    margin-right: 10px; /* Space between image and text */
-}
-```
-
-#### JavaScript
-```javascript
 document.addEventListener("DOMContentLoaded", () => {
     const coinImage = document.getElementById("coin-image");
     const clickCounter = document.getElementById("click-counter");
@@ -276,170 +9,129 @@ document.addEventListener("DOMContentLoaded", () => {
     const storeMenu = document.getElementById("store-menu");
     const backButton = document.getElementById("back-button");
     const backStoreButton = document.getElementById("back-store-button");
+    const changeOptions = document.querySelectorAll(".change-option");
     const upgradeClickButton = document.getElementById("upgrade-click");
     const upgradeEnergyButton = document.getElementById("upgrade-energy");
-    const reduceRegenerationButton = document.getElementById("reduce-regeneration");
-    const resetProgressButton = document.getElementById("reset-progress");
+    const reduceRegenButton = document.getElementById("reduce-regeneration");
 
-    let clickCounts = {
+    let clickCount = 0;
+    let energy = 2000;
+    let maxEnergy = 2000;
+    let clickValue = 1;
+    let regenTime = 10000; // время регенерации в миллисекундах
+    const clickCounts = {
         coin1: 0,
         coin2: 0,
         coin3: 0,
         coin4: 0
     };
-
-    let clickUpgrades = {
+    const clickUpgrades = {
         coin1: 1,
         coin2: 1,
         coin3: 1,
         coin4: 1
     };
-
-    let regenUpgrades = {
+    const regenUpgrades = {
         coin1: 0,
         coin2: 0,
         coin3: 0,
         coin4: 0
     };
-
-    let maxEnergy = 2000;
-    let energy = 2000;
     let currentCoin = "coin1";
-    let regenTime = 1000; // 1 second by default
 
-    function updateEnergyBar() {
-        energyFill.style.width = (energy / maxEnergy) * 100 + "%";
+    const updateEnergyBar = () => {
+        const percentage = (energy / maxEnergy) * 100;
+        energyFill.style.width = `${percentage}%`;
         energyLabel.textContent = `${energy} / ${maxEnergy}`;
-    }
+    };
 
-    function saveGame() {
-        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
-        localStorage.setItem("energy", energy);
-        localStorage.setItem("currentCoin", currentCoin);
-    }
+    const animateClick = (value) => {
+        const animElem = document.createElement("div");
+        animElem.textContent = `+${value}`;
+        animElem.className = "click-animation";
+        animElem.style.position = "absolute";
+        animElem.style.left = "50%";
+        animElem.style.top = "50%";
+        animElem.style.transform = "translate(-50%, -100%)";
+        animElem.style.fontSize = "20px";
+        animElem.style.fontWeight = "bold";
+        animElem.style.color = "red";
+        document.body.appendChild(animElem);
 
-    function loadGame() {
-        const savedClickCounts = localStorage.getItem("clickCounts");
-        const savedEnergy = localStorage.getItem("energy");
-        const savedCurrentCoin = localStorage.getItem("currentCoin");
+        setTimeout(() => {
+            animElem.style.top = "20%";
+            animElem.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(animElem), 500);
+        }, 0);
+    };
 
-        if (savedClickCounts) {
-            clickCounts = JSON.parse(savedClickCounts);
-        }
-        if (savedEnergy) {
-            energy = parseInt(savedEnergy);
-        }
-        if (savedCurrentCoin) {
-            currentCoin = savedCurrentCoin;
-            coinImage.src = currentCoin + ".png";
-        }
-
-        clickCounter.textContent = clickCounts[currentCoin];
-        updateEnergyBar();
-    }
-
-    function incrementClicks() {
+    coinImage.addEventListener("click", () => {
         if (energy > 0) {
             clickCounts[currentCoin] += clickUpgrades[currentCoin];
-            energy -= 1; // Decrease energy on click
             clickCounter.textContent = clickCounts[currentCoin];
+            animateClick(clickUpgrades[currentCoin]);
+            energy -= clickUpgrades[currentCoin];
             updateEnergyBar();
-            saveGame();
-
-            const animation = document.createElement("div");
-            animation.className = "click-animation";
-            animation.textContent = "+" + clickUpgrades[currentCoin];
-            document.body.appendChild(animation);
-            setTimeout(() => {
-                animation.remove();
-            }, 1000);
-        } else {
-            alert("Недостаточно энергии!");
         }
-    }
-
-    coinImage.addEventListener("click", incrementClicks);
+    });
 
     changeButton.addEventListener("click", () => {
-        changeMenu.classList.toggle("hidden");
+        changeMenu.classList.remove("hidden");
+    });
+
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.remove("hidden");
     });
 
     backButton.addEventListener("click", () => {
         changeMenu.classList.add("hidden");
     });
 
-    storeButton.addEventListener("click", () => {
-        storeMenu.classList.toggle("hidden");
-    });
-
     backStoreButton.addEventListener("click", () => {
         storeMenu.classList.add("hidden");
     });
 
-    upgradeClickButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 50) {
-            clickCounts[currentCoin] -= 50;
-            clickUpgrades[currentCoin]++;
+    changeOptions.forEach(option => {
+        option.addEventListener("click", (event) => {
+            const newImage = event.target.getAttribute("data-image");
+            currentCoin = newImage.replace(".png", "");
+            coinImage.src = newImage;
             clickCounter.textContent = clickCounts[currentCoin];
-            saveGame();
+            changeMenu.classList.add("hidden");
+        });
+    });
+
+    upgradeClickButton.addEventListener("click", () => {
+        const cost = 50 * (clickUpgrades[currentCoin]);
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
+            clickUpgrades[currentCoin] += 1;
+            clickCounter.textContent = clickCounts[currentCoin];
+            upgradeClickButton.textContent = `Прокачка кликов (+${clickUpgrades[currentCoin]}) - ${cost * 2}`;
         }
     });
 
     upgradeEnergyButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 3000) {
-            clickCounts[currentCoin] -= 3000;
+        const cost = 3000 + (maxEnergy - 2000) / 500 * 500;
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
             maxEnergy += 500;
-            energy = maxEnergy; // Restore energy to max
+            energy = Math.min(energy, maxEnergy);
             updateEnergyBar();
-            saveGame();
+            upgradeEnergyButton.textContent = `Прокачка энергии (+500) - ${cost + 500}`;
         }
     });
 
-    reduceRegenerationButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 2000) {
-            clickCounts[currentCoin] -= 2000;
-            regenTime = Math.max(500, regenTime - 100); // Decrease regeneration time
-            saveGame();
-        }
-    });
+    reduceRegenButton.addEventListener("click", () => {
+        const cost = 2000 + regenUpgrades[current
 
-    document.querySelectorAll('.change-option').forEach(button => {
-        button.addEventListener('click', () => {
-            const newCoin = button.getAttribute('data-image');
-            currentCoin = newCoin.split('.')[0]; // Set currentCoin without extension
-            coinImage.src = newCoin;
-            saveGame();
+Coin] * 1000;
+        if (clickCounts[currentCoin] >= cost && regenTime > 1000) {
+            clickCounts[currentCoin] -= cost;
+            regenUpgrades[currentCoin] += 1;
+            regenTime -= 100; // Уменьшение времени на 0.1 секунды
+            reduceRegenButton.textContent = `Уменьшение регенерации (на 0.1 сек) - ${cost + 1000}`;
             clickCounter.textContent = clickCounts[currentCoin];
-        });
-    });
-
-    resetProgressButton.addEventListener('click', () => {
-        if (confirm("Вы уверены, что хотите удалить весь прогресс? Это действие необратимо.")) {
-            localStorage.clear();
-            clickCounts = {
-                coin1: 0,
-                coin2: 0,
-                coin3: 0,
-                coin4: 0
-            };
-            clickUpgrades = {
-                coin1: 1,
-                coin2: 1,
-                coin3: 1,
-                coin4: 1
-            };
-            regenUpgrades = {
-                coin1: 0,
-                coin2: 0,
-                coin3: 0,
-                coin4: 0
-            };
-            maxEnergy = 2000;
-            energy = 2000;
-            currentCoin = "coin1";
-            clickCounter.textContent = clickCounts[currentCoin];
-            updateEnergyBar();
-            saveGame();
         }
     });
 
@@ -448,15 +140,16 @@ document.addEventListener("DOMContentLoaded", () => {
             energy += 1;
             updateEnergyBar();
         }
-    }, Math.max(regenTime, 1000)); // Ensure the interval doesn't go below 1 second
+    }, regenTime);
+    
+    // Убираем возможность масштабирования на мобильных устройствах
+    document.addEventListener('touchstart', function(event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
 
-    loadGame();
+    document.addEventListener('dblclick', function(event) {
+        event.preventDefault();
+    }, { passive: false });
 });
-```
-
-### Summary of Changes
-1. **Images for Coins**: Coin buttons now display images alongside their text.
-2. **Progress Deletion**: Added a confirmation before resetting progress.
-3. **Energy Regeneration Fix**: Ensured that energy regenerates correctly based on upgrades.
-
-Make sure you have the image files (`coin1.png`, `coin2.png`, etc.) available in your project directory for the coins to display correctly. Adjust the paths in the `data-image` attributes if necessary.
