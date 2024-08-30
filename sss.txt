@@ -1,4 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
+    // Ваши существующие элементы
     const coinImage = document.getElementById("coin-image");
     const clickCounter = document.getElementById("click-counter");
     const energyFill = document.getElementById("energy-fill");
@@ -15,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const reduceRegenButton = document.getElementById("reduce-regeneration");
     const dailyRewardTimer = document.getElementById("daily-reward-timer");
 
+    // Ваши существующие переменные
     let energy = 2000;
     let maxEnergy = 2000;
     let regenTime = 10000; // время регенерации в миллисекундах
@@ -59,6 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 0);
     };
 
+    // Обработчик клика по монете
     coinImage.addEventListener("click", (event) => {
         if (energy > 0) {
             clickCounts[currentCoin] += clickUpgrades[currentCoin];
@@ -71,22 +74,29 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Показать меню изменений
     changeButton.addEventListener("click", () => {
         changeMenu.classList.remove("hidden");
+        storeMenu.classList.add("hidden"); // Скрываем меню магазина, если оно открыто
     });
 
+    // Показать меню магазина
     storeButton.addEventListener("click", () => {
         storeMenu.classList.remove("hidden");
+        changeMenu.classList.add("hidden"); // Скрываем меню изменений, если оно открыто
     });
 
+    // Скрыть меню изменений
     backButton.addEventListener("click", () => {
         changeMenu.classList.add("hidden");
     });
 
+    // Скрыть меню магазина
     backStoreButton.addEventListener("click", () => {
         storeMenu.classList.add("hidden");
     });
 
+    // Обработка выбора опций изменений
     changeOptions.forEach(option => {
         option.addEventListener("click", (event) => {
             const newImage = event.target.getAttribute("data-image");
@@ -97,6 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    // Сохранение игры
     const saveGame = () => {
         localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
         localStorage.setItem("clickUpgrades", JSON.stringify(clickUpgrades));
@@ -106,6 +117,7 @@ document.addEventListener("DOMContentLoaded", () => {
         localStorage.setItem("regenTime", regenTime);
     };
 
+    // Загрузка игры
     const loadGame = () => {
         const savedClickCounts = JSON.parse(localStorage.getItem("clickCounts"));
         const savedClickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades"));
@@ -138,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
         updateEnergyBar();
     };
 
+    // Проверка ежедневной награды
     const checkDailyReward = () => {
         const lastClaim = localStorage.getItem("lastDailyReward");
         const now = new Date();
@@ -175,6 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
         setTimeout(() => updateDailyRewardTimer(nextRewardTime), 1000);
     };
 
+    // Обработчик кнопки прокачки кликов
     upgradeClickButton.addEventListener("click", () => {
         const cost = clickUpgrades[currentCoin] * 50;
         if (clickCounts[currentCoin] >= cost) {
@@ -186,6 +200,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Обработчик кнопки прокачки энергии
     upgradeEnergyButton.addEventListener("click", () => {
         const cost = (maxEnergy / 500) * 3000;
         if (clickCounts[currentCoin] >= cost) {
@@ -198,6 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Обработчик кнопки уменьшения времени регенерации
     reduceRegenButton.addEventListener("click", () => {
         const cost = regenUpgrades[currentCoin] * 1000 + 2000;
         if (clickCounts[currentCoin] >= cost && regenTime > 1000) {
@@ -210,6 +226,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
+    // Регенерация энергии
     setInterval(() => {
         if (energy < maxEnergy) {
             energy += 1;
