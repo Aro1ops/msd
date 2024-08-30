@@ -1,307 +1,337 @@
-Для создания игры, похожей на Hamster Combat, с дизайном и функционалом, который вы описали, потребуется HTML, CSS, и JavaScript. Вот пример кода, который реализует основные функции, такие как нажатие на изображение, изменение изображения, прокачка кликов и энергии, отображение счетчика и сохранение данных с помощью Local Storage.
+Js
+document.addEventListener("DOMContentLoaded", () => {
+    const coinImage = document.getElementById("coin-image");
+    const clickCounter = document.getElementById("click-counter");
+    const energyFill = document.getElementById("energy-fill");
+    const energyLabel = document.getElementById("energy-label");
+    const changeButton = document.getElementById("change-button");
+    const storeButton = document.getElementById("store-button");
+    const changeMenu = document.getElementById("change-menu");
+    const storeMenu = document.getElementById("store-menu");
+    const backButton = document.getElementById("back-button");
+    const backStoreButton = document.getElementById("back-store-button");
+    const upgradeClickButton = document.getElementById("upgrade-click");
+    const upgradeEnergyButton = document.getElementById("upgrade-energy");
+    const reduceRegenButton = document.getElementById("reduce-regeneration");
+    const dailyRewardTimer = document.getElementById("daily-reward-timer");
 
-```html
+    let clickCount = 0;
+    let energy = 2000;
+    let maxEnergy = 2000;
+    let clickValue = 1;
+    let regenTime = 10000; // время регенерации в миллисекундах
+    const clickCounts = JSON.parse(localStorage.getItem("clickCounts")) || {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
+    const clickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades")) || {
+        coin1: 1,
+        coin2: 1,
+        coin3: 1,
+        coin4: 1
+    };
+    const regenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades")) || {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
+    let currentCoin = "coin1";
+
+    const updateEnergyBar = () => {
+        const percentage = (energy / maxEnergy) * 100;
+        energyFill.style.width = `${percentage}%`;
+        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    };
+
+    const animateClick = (x, y, value) => {
+        const animElem = document.createElement("div");
+        animElem.textContent = `+${value}`;
+        animElem.className = "click-animation";
+        animElem.style.left = `${x}px`;
+        animElem.style.top = `${y}px`;
+        document.body.appendChild(animElem);
+
+        setTimeout(() => {
+            animElem.style.top = `${y - 50}px`;
+            animElem.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(animElem), 1000);
+        }, 0);
+    };
+
+    coinImage.addEventListener("click", (event) => {
+        if (energy > 0) {
+            clickCounts[currentCoin] += clickUpgrades[currentCoin];
+            clickCounter.textContent = clickCounts[currentCoin];
+            const { clientX: x, clientY: y } = event;
+            animateClick(x, y, clickUpgrades[currentCoin]);
+            energy -= clickUpgrades[currentCoin];
+            updateEnergyBar();
+            saveGame();
+        }
+    });
+
+    changeButton.addEventListener("click", () => {
+        changeMenu.classList.remove("hidden");
+        storeMenu.classList.add("hidden");
+    });
+
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.remove("hidden");
+        changeMenu.classList.add("hidden");
+    });
+
+    backButton.addEventListener("click", () => {
+        changeMenu.classList.add("hidden");
+    });
+
+    backStoreButton.addEventListener("click", () => {
+        storeMenu.classList.add("hidden");
+    });
+
+    const saveGame = () => {
+        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
+        localStorage.setItem("clickUpgrades", JSON.stringify(clickUpgrades));
+        localStorage.setItem("regenUpgrades", JSON.stringify(regenUpgrades));
+        localStorage.setItem("maxEnergy", maxEnergy);
+        localStorage.setItem("currentCoin", currentCoin);
+        localStorage.setItem("regenTime", regenTime);
+    };
+
+    const loadGame = () => {
+        const savedClickCounts = JSON.parse(localStorage.getItem("clickCounts"));
+        const savedClickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades"));
+        const savedRegenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades"));
+        const savedMaxEnergy = localStorage.getItem("maxEnergy");
+        const savedCurrentCoin = localStorage.getItem("currentCoin");
+        const savedRegenTime = localStorage.getItem("regenTime");
+
+        if (savedClickCounts) {
+            Object.assign(clickCounts, savedClickCounts);
+        }
+        if (savedClickUpgrades) {
+            Object.assign(clickUpgrades, savedClickUpgrades);
+        }
+        if (savedRegenUpgrades) {
+            Object.assign(regenUpgrades, savedRegenUpgrades);
+        }
+        if (savedMaxEnergy) {
+            maxEnergy = parseInt(savedMaxEnergy, 10);
+        }
+        if (savedCurrentCoin) {
+            currentCoin = savedCurrentCoin;
+            coinImage.src = `${currentCoin}.png`;
+        }
+        if (savedRegenTime) {
+            regenTime = parseInt(savedRegenTime, 10);
+        }
+
+        clickCounter.textContent = clickCounts[currentCoin];
+        updateEnergyBar();
+    };
+
+    const checkDailyReward = () => {
+        const lastClaim = localStorage.getItem("lastDailyReward");
+        const now = new Date();
+        const nextRewardTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0); // 11:00 следующего дня
+
+        if (lastClaim) {
+            const lastClaimDate = new Date(parseInt(lastClaim, 10));
+            if (now > nextRewardTime) {
+                clickCounts[currentCoin] += 1000;
+                clickCounter.textContent = clickCounts[currentCoin];
+                localStorage.setItem("lastDailyReward", now.getTime());
+                saveGame();
+            }
+        } else {
+            localStorage.setItem("lastDailyReward", now.getTime());
+        }
+        updateDailyRewardTimer(nextRewardTime);
+    };
+
+    const updateDailyRewardTimer = (nextRewardTime) => {
+        const now = new Date();
+        let timeRemaining = nextRewardTime - now;
+
+        if (timeRemaining < 0) {
+            nextRewardTime.setDate(nextRewardTime.getDate() + 1);
+            timeRemaining = nextRewardTime - now;
+        }
+
+        const hours = Math.floor(timeRemaining / 3600000);
+        const minutes = Math.floor((timeRemaining % 3600000) / 60000);
+        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+
+        dailyRewardTimer.textContent = `До награды: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        setTimeout(() => updateDailyRewardTimer(nextRewardTime), 1000);
+    };
+
+    upgradeClickButton.addEventListener("click", () => {
+        const cost = clickUpgrades[currentCoin] * 50;
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
+            clickUpgrades[currentCoin] += 1;
+            upgradeClickButton.textContent = `Прокачка кликов (+${clickUpgrades[currentCoin]}) - ${clickUpgrades[currentCoin] * 50}`;
+            clickCounter.textContent = clickCounts[currentCoin];
+            saveGame();
+        }
+    });
+
+    upgradeEnergyButton.addEventListener("click", () => {
+        const cost = (maxEnergy / 500) * 3000;
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
+            maxEnergy += 500;
+            upgradeEnergyButton.textContent = `Прокачка энергии (+500) - ${(maxEnergy / 500) * 3000}`;
+            clickCounter.textContent = clickCounts[currentCoin];
+            updateEnergyBar();
+            saveGame();
+        }
+    });
+
+    reduceRegenButton.addEventListener("click", () => {
+        const cost = regenUpgrades[currentCoin] * 1000 + 2000;
+        if (clickCounts[currentCoin] >= cost && regenTime > 1000) {
+            clickCounts[currentCoin] -= cost;
+            regenUpgrades[currentCoin] += 1;
+            regenTime -= 100; // Уменьшение времени на 0.1 сек
+            reduceRegenButton.textContent = `Уменьшение регенерации (на ${regenUpgrades[currentCoin] * 0.1} сек) - ${regenUpgrades[currentCoin] * 1000 + 2000}`;
+            clickCounter.textContent = clickCounts[currentCoin];
+            saveGame();
+        }
+    });
+
+    loadGame();
+    checkDailyReward();
+
+    setInterval(() => {
+        if (energy < maxEnergy) {
+            energy += 1;
+            updateEnergyBar();
+        }
+    }, regenTime);
+});
+html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Coin Clicker Game</title>
-    <style>
-        /* Стили для страницы */
-        body, html {
-            margin: 0;
-            padding: 0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            background-color: #f0f0f0;
-            height: 100%;
-            user-select: none; /* Отключение выделения текста */
-        }
-
-        #coin {
-            width: 45%; /* Размер монеты относительно экрана */
-            position: absolute;
-            bottom: 30%; /* Позиция монеты ниже середины экрана */
-            transition: transform 0.1s, opacity 0.1s;
-        }
-
-        #click-counter {
-            position: absolute;
-            top: 20%;
-            font-size: 2rem;
-            font-weight: bold;
-        }
-
-        #hotbar-container {
-            position: absolute;
-            top: 10%;
-            width: 90%;
-            height: 25px;
-            background-color: #ccc;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: left;
-            overflow: hidden;
-        }
-
-        #hotbar {
-            background-color: #76c7c0;
-            height: 100%;
-            transition: width 0.2s;
-        }
-
-        #hotbar-text {
-            position: absolute;
-            right: 5%;
-            font-size: 1rem;
-            font-weight: bold;
-        }
-
-        #change-image, #shop-button {
-            position: absolute;
-            bottom: 10%;
-            padding: 15px 30px;
-            font-size: 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-        }
-
-        #change-image {
-            left: 5%;
-            background-color: #ffcc00;
-        }
-
-        #shop-button {
-            right: 5%;
-            background-color: #00ccff;
-        }
-
-        .hidden {
-            display: none;
-        }
-
-        #change-menu, #shop-menu {
-            position: absolute;
-            bottom: 20%;
-            width: 90%;
-            height: 50%;
-            background-color: white;
-            border-radius: 10px;
-            padding: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-
-        .option-button {
-            font-size: 1.2rem;
-            padding: 10px;
-            margin: 10px 0;
-            cursor: pointer;
-            border-radius: 5px;
-            border: none;
-        }
-
-        .back-button {
-            padding: 10px 20px;
-            font-size: 1.5rem;
-            border-radius: 5px;
-            cursor: pointer;
-            border: none;
-            background-color: #ff6666;
-            margin-top: 10px;
-        }
-
-        #shop-menu p, #change-menu p {
-            margin: 0;
-        }
-    </style>
+    <title>Clicker Game</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Счетчик нажатий -->
+    <div class="energy-bar">
+        <div id="energy-fill" class="energy-fill"></div>
+        <div id="energy-label" class="energy-label">2000 / 2000</div>
+    </div>
     <div id="click-counter">0</div>
-    
-    <!-- Полоса энергии -->
-    <div id="hotbar-container">
-        <div id="hotbar" style="width: 100%;"></div>
-        <div id="hotbar-text">2000/2000</div>
-    </div>
-    
-    <!-- Монета -->
-    <img src="coin.png" id="coin">
-    
-    <!-- Кнопки для изменения изображения и открытия магазина -->
-    <button id="change-image">Изменить</button>
-    <button id="shop-button">Магазин</button>
-    
-    <!-- Меню изменения изображения -->
+    <img id="coin-image" src="coin.png" alt="Coin Image">
+    <button id="change-button">Изменить</button>
+    <button id="store-button">Магазин</button>
     <div id="change-menu" class="hidden">
-        <button class="option-button" data-image="coin1.png">Монета 1</button>
-        <button class="option-button" data-image="coin2.png">Монета 2</button>
-        <button class="option-button" data-image="coin3.png">Монета 3</button>
-        <button class="option-button" data-image="coin4.png">Монета 4</button>
-        <button class="back-button">Назад</button>
+        <button id="back-button">Назад ←</button>
+        <button class="change-option" data-image="coin1.png">Монета 1</button>
+        <button class="change-option" data-image="coin2.png">Монета 2</button>
+        <button class="change-option" data-image="coin3.png">Монета 3</button>
+        <button class="change-option" data-image="coin4.png">Монета 4</button>
     </div>
-    
-    <!-- Меню магазина -->
-    <div id="shop-menu" class="hidden">
-        <p>Улучшение клика:</p>
-        <button class="option-button" id="buy-click">Купить +1 клик (50)</button>
-        <small>Текущий бонус: +1</small>
-        <p>Улучшение энергии:</p>
-        <button class="option-button" id="buy-energy">Увеличить энергию до 2500 (3000)</button>
-        <small>Текущая энергия: 2000/2000</small>
-        <p>Улучшение регенерации:</p>
-        <button class="option-button" id="buy-regeneration">Снизить интервал до 9.9 сек (2000)</button>
-        <small>Текущий интервал: 10 сек</small>
-        <button class="back-button">Назад</button>
+    <div id="store-menu" class="hidden">
+        <button id="upgrade-click">Прокачка кликов (+1) - 50</button>
+        <button id="upgrade-energy">Прокачка энергии (+500) - 3000</button>
+        <button id="reduce-regeneration">Уменьшение регенерации (на 0.1 сек) - 2000</button>
+        <button id="back-store-button">Назад ←</button>
     </div>
-    
-    <script>
-        // Переменные
-        let clickCount = 0;
-        let clickValue = 1;
-        let energy = 2000;
-        let maxEnergy = 2000;
-        let regenerationRate = 10;
-        let clickCooldown = false;
-        let selectedImage = 'coin.png';
-
-        // Элементы
-        const clickCounter = document.getElementById('click-counter');
-        const coin = document.getElementById('coin');
-        const hotbar = document.getElementById('hotbar');
-        const hotbarText = document.getElementById('hotbar-text');
-        const changeMenu = document.getElementById('change-menu');
-        const shopMenu = document.getElementById('shop-menu');
-        const changeImageButton = document.getElementById('change-image');
-        const shopButton = document.getElementById('shop-button');
-
-        // Функция обновления полосы энергии
-        function updateHotbar() {
-            const percentage = (energy / maxEnergy) * 100;
-            hotbar.style.width = percentage + '%';
-            hotbarText.textContent = `${energy}/${maxEnergy}`;
-        }
-
-        // Функция клика по монете
-        function clickCoin() {
-            if (energy > 0 && !clickCooldown) {
-                clickCount += clickValue;
-                clickCounter.textContent = clickCount;
-                energy -= clickValue;
-                updateHotbar();
-
-                // Анимация нажатия на монету
-                coin.style.transform = 'scale(0.95)';
-                coin.style.opacity = '0.7';
-                setTimeout(() => {
-                    coin.style.transform = 'scale(1)';
-                    coin.style.opacity = '1';
-                }, 100);
-
-                // Показ числа над монетой
-                const floatingNumber = document.createElement('div');
-                floatingNumber.textContent = `+${clickValue}`;
-                floatingNumber.style.position = 'absolute';
-                floatingNumber.style.bottom = '50%';
-                floatingNumber.style.left = '50%';
-                floatingNumber.style.transform = 'translate(-50%, -50%)';
-                floatingNumber.style.fontSize = '2rem';
-                floatingNumber.style.color = '#00cc00';
-                document.body.appendChild(floatingNumber);
-
-                // Анимация исчезновения числа
-                setTimeout(() => {
-                    floatingNumber.style.transition = 'all 0.5s';
-                    floatingNumber.style.transform = 'translate(-50%, -100%)';
-                    floatingNumber.style.opacity = '0';
-                    setTimeout(() => document.body.removeChild(floatingNumber), 500);
-                }, 500);
-            }
-        }
-
-        // Обработчик кликов по монете
-        coin.addEventListener('click', clickCoin);
-
-        // Обработчики для кнопок изменения изображения и магазина
-        changeImageButton.addEventListener('click', () => {
-            changeMenu.classList.toggle('hidden');
-        });
-
-        shopButton.addEventListener('click', () => {
-            shopMenu.classList.toggle('hidden');
-        });
-
-        document.querySelectorAll('.back-button').forEach(button => {
-            button.addEventListener('click', () => {
-                changeMenu.classList.add('hidden');
-                shopMenu.classList.add('hidden');
-            });
-        });
-
-        // Изменение изображения монеты
-        document.querySelectorAll('.option-button').forEach(button => {
-            button.addEventListener('click', (e) => {
-                const newImage = e.target.getAttribute('data-image');
-                selectedImage = newImage;
-                coin.src = selectedImage;
-                clickCount = 0; // Сброс счетчика при смене монеты
-                clickCounter.textContent = clickCount;
-            });
-        });
-
-        // Функции прокачки
-        document.getElementById('buy-click').addEventListener('click', () => {
-            const price = clickValue * 50;
-            if (clickCount >= price) {
-                clickCount -= price;
-                clickValue += 1;
-                localStorage.setItem('clickCount', clickCount);
-                updateHotbar();
-            }
-        });
-
-        // Функция регенерации энергии
-        setInterval(() => {
-            if (energy < maxEnergy && energy > 0) {
-                energy += 1;
-                updateHotbar();
-            }
-        }, 10000); // Регенерация каждую секунду
-
-        // Сохранение состояния в Local Storage
-        window.onload = () => {
-            const savedClicks = localStorage.getItem('clickCount');
-            if (savedClicks) {
-                clickCount = parseInt(savedClicks);
-            }
-            updateHotbar();
-        };
-
-        // Ежедневная награда
-        setInterval(() => {
-            const now = new Date();
-            if (now.getHours() === 11 && now.getMinutes() === 0) {
-                clickCount += 1000;
-                localStorage.setItem('clickCount', clickCount);
-                updateHotbar();
-            }
-        }, 60000); // Проверять каждую минуту
-    </script>
+    <div id="daily-reward-timer">До награды: --:--:--</div>
+    <script src="script.js"></script>
 </body>
 </html>
-```
+css
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
 
-### Описание кода:
-1. **HTML**: Содержит структуру игры с элементами для монеты, счетчика, кнопок и меню.
-2. **CSS**: Оформляет элементы на странице, создавая дизайн, подходящий для мобильных устройств.
-3. **JavaScript**: Реализует логику игры, включая клики по монете, изменение изображений, прокачку, сохранение данных с помощью Local Storage, и ежедневные награды.
+#coin-image {
+    width: 80%; /* Coin now occupies most of the screen width */
+    height: auto;
+    cursor: pointer;
+    margin-top: 20px;
+}
 
-### Ф
+#click-counter {
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+.energy-bar {
+    width: 80%;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px; /* Rounded corners for energy bar */
+    overflow: hidden;
+    margin: 20px 0;
+    position: relative;
+}
+
+.energy-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #76c7c0;
+}
+
+.energy-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.hidden {
+    display: none;
+}
+
+.click-animation {
+    position: absolute;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: green;
+    pointer-events: none;
+    animation: clickAnim 1s forwards;
+}
+
+@keyframes clickAnim {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
