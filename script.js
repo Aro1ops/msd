@@ -139,42 +139,9 @@ document.addEventListener("DOMContentLoaded", () => {
         updateEnergyBar();
     };
 
-    const checkDailyReward = () => {
-        const lastClaim = localStorage.getItem("lastDailyReward");
-        const now = new Date();
-        const nextRewardTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0); // 11:00 следующего дня
 
-        if (lastClaim) {
-            const lastClaimDate = new Date(parseInt(lastClaim, 10));
-            if (now > nextRewardTime) {
-                clickCounts[currentCoin] += 1000;
-                clickCounter.textContent = clickCounts[currentCoin];
-                localStorage.setItem("lastDailyReward", now.getTime());
-                saveGame();
-            }
-        } else {
-            localStorage.setItem("lastDailyReward", now.getTime());
-        }
-        updateDailyRewardTimer(nextRewardTime);
-    };
 
-    const updateDailyRewardTimer = (nextRewardTime) => {
-        const now = new Date();
-        let timeRemaining = nextRewardTime - now;
 
-        if (timeRemaining < 0) {
-            nextRewardTime.setDate(nextRewardTime.getDate() + 1);
-            timeRemaining = nextRewardTime - now;
-        }
-
-        const hours = Math.floor(timeRemaining / 3600000);
-        const minutes = Math.floor((timeRemaining % 3600000) / 60000);
-        const seconds = Math.floor((timeRemaining % 60000) / 1000);
-
-        dailyRewardTimer.textContent = `До награды: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
-
-        setTimeout(() => updateDailyRewardTimer(nextRewardTime), 1000);
-    };
 
     upgradeClickButton.addEventListener("click", () => {
         const cost = clickUpgrades[currentCoin] * 50;
@@ -221,7 +188,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     loadGame();
-    checkDailyReward();
+    
 
     setInterval(() => {
         if (energy < maxEnergy) {
