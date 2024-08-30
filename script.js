@@ -11,131 +11,205 @@ document.addEventListener("DOMContentLoaded", () => {
     const backStoreButton = document.getElementById("back-store-button");
     const upgradeClickButton = document.getElementById("upgrade-click");
     const upgradeEnergyButton = document.getElementById("upgrade-energy");
-    const reduceRegenerationButton = document.getElementById("reduce-regeneration");
-    const resetProgressButton = document.getElementById("reset-progress");
+    const reduceRegenButton = document.getElementById("reduce-regeneration");
+    const dailyRewardTimer = document.getElementById("daily-reward-timer");
 
-    let clickCounts = {
+    let clickCount = 0;
+    let energy = 2000;
+    let maxEnergy = 2000;
+    let clickValue = 1;
+    let regenTime = 10000; // время регенерации в миллисекундах
+    const clickCounts = JSON.parse(localStorage.getItem("clickCounts")) || {
         coin1: 0,
         coin2: 0,
         coin3: 0,
         coin4: 0
     };
-
-    let clickUpgrades = {
+    const clickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades")) || {
         coin1: 1,
         coin2: 1,
         coin3: 1,
         coin4: 1
     };
-
-    let regenUpgrades = {
+    const regenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades")) || {
         coin1: 0,
         coin2: 0,
         coin3: 0,
         coin4: 0
     };
-
-    let maxEnergy = 2000;
-    let energy = 2000;
     let currentCoin = "coin1";
-    let regenTime = 10000; // 1 second by default
-
-    function updateEnergyBar() {
-        energyFill.style.width = (energy / maxEnergy) * 100 + "%";
-        energyLabel.textContent = `${energy} / ${maxEnergy}`;
-    }
-
-    function saveGame() {
-        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
-        localStorage.setItem("energy", energy);
-        localStorage.setItem("currentCoin", currentCoin);
-    }
-
-    function loadGame() {
-        const savedClickCounts = localStorage.getItem("clickCounts");
-        const savedEnergy = localStorage.getItem("energy");
-        const savedCurrentCoin = localStorage.getItem("currentCoin");
-
-        if (savedClickCounts) {
-            clickCounts = JSON.parse(savedClickCounts);
-        }
-        if (savedEnergy) {
-            energy = parseInt(savedEnergy);
-        }
-        if (savedCurrentCoin) {
-            currentCoin = savedCurrentCoin;
-            coinImage.src = currentCoin + ".png";
-        }
-
+    document.querySelectorAll('.change-option').forEach(button => {
+    button.addEventListener('click', () => {
+        const newCoin = button.getAttribute('data-image');
+        currentCoin = newCoin.split('.')[0]; // Set currentCoin without extension
+        coinImage.src = newCoin;
+        saveGame();
         clickCounter.textContent = clickCounts[currentCoin];
-        updateEnergyBar();
-    }
+    });
+});
+    const updateEnergyBar = () => {
+        const percentage = (energy / maxEnergy) * 100;
+        energyFill.style.width = `${percentage}%`;
+        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    };
 
-    function incrementClicks() {
+    const animateClick = (x, y, value) => {
+        const animElem = document.createElement("div");
+        animElem.textContent = `+${value}`;
+        animElem.className = "click-animation";
+        animElem.style.left = `${x}px`;
+        animElem.style.top = `${y}px`;
+        document.body.appendChild(animElem);
+
+        setTimeout(() => {
+            animElem.style.top = `${y - 50}px`;
+            animElem.style.opacity = "0";
+            setTimeout(() => document.body.removeChild(animElem), 1000);
+        }, 0);
+    };
+
+    coinImage.addEventListener("click", (event) => {
         if (energy > 0) {
             clickCounts[currentCoin] += clickUpgrades[currentCoin];
-            energy -= 1; // Decrease energy on click
             clickCounter.textContent = clickCounts[currentCoin];
+            const { clientX: x, clientY: y } = event;
+            animateClick(x, y, clickUpgrades[currentCoin]);
+            energy -= clickUpgrades[currentCoin];
             updateEnergyBar();
             saveGame();
-
-            const animation = document.createElement("div");
-            animation.className = "click-animation";
-            animation.textContent = "+" + clickUpgrades[currentCoin];
-            document.body.appendChild(animation);
-            setTimeout(() => {
-                animation.remove();
-            }, 1000);
-        } else {
-            alert("Недостаточно энергии!");
         }
-    }
-
-    coinImage.addEventListener("click", incrementClicks);
+    });
 
     changeButton.addEventListener("click", () => {
-        changeMenu.classList.toggle("hidden");
+        changeMenu.classList.remove("hidden");
+        storeMenu.classList.add("hidden");
+    });
+
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.remove("hidden");
+        changeMenu.classList.add("hidden");
     });
 
     backButton.addEventListener("click", () => {
         changeMenu.classList.add("hidden");
     });
 
-    storeButton.addEventListener("click", () => {
-        storeMenu.classList.toggle("hidden");
-    });
-
     backStoreButton.addEventListener("click", () => {
         storeMenu.classList.add("hidden");
     });
 
+    const saveGame = () => {
+        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
+        localStorage.setItem("clickUpgrades", JSON.stringify(clickUpgrades));
+        localStorage.setItem("regenUpgrades", JSON.stringify(regenUpgrades));
+        localStorage.setItem("maxEnergy", maxEnergy);
+        localStorage.setItem("currentCoin", currentCoin);
+        localStorage.setItem("regenTime", regenTime);
+    };
+
+    const loadGame = () => {
+        const savedClickCounts = JSON.parse(localStorage.getItem("clickCounts"));
+        const savedClickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades"));
+        const savedRegenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades"));
+        const savedMaxEnergy = localStorage.getItem("maxEnergy");
+        const savedCurrentCoin = localStorage.getItem("currentCoin");
+        const savedRegenTime = localStorage.getItem("regenTime");
+
+        if (savedClickCounts) {
+            Object.assign(clickCounts, savedClickCounts);
+        }
+        if (savedClickUpgrades) {
+            Object.assign(clickUpgrades, savedClickUpgrades);
+        }
+        if (savedRegenUpgrades) {
+            Object.assign(regenUpgrades, savedRegenUpgrades);
+        }
+        if (savedMaxEnergy) {
+            maxEnergy = parseInt(savedMaxEnergy, 10);
+        }
+        if (savedCurrentCoin) {
+            currentCoin = savedCurrentCoin;
+            coinImage.src = `${currentCoin}.png`;
+        }
+        if (savedRegenTime) {
+            regenTime = parseInt(savedRegenTime, 10);
+        }
+
+        clickCounter.textContent = clickCounts[currentCoin];
+        updateEnergyBar();
+    };
+
+    const checkDailyReward = () => {
+        const lastClaim = localStorage.getItem("lastDailyReward");
+        const now = new Date();
+        const nextRewardTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 11, 0, 0); // 11:00 следующего дня
+
+        if (lastClaim) {
+            const lastClaimDate = new Date(parseInt(lastClaim, 10));
+            if (now > nextRewardTime) {
+                clickCounts[currentCoin] += 1000;
+                clickCounter.textContent = clickCounts[currentCoin];
+                localStorage.setItem("lastDailyReward", now.getTime());
+                saveGame();
+            }
+        } else {
+            localStorage.setItem("lastDailyReward", now.getTime());
+        }
+        updateDailyRewardTimer(nextRewardTime);
+    };
+
+    const updateDailyRewardTimer = (nextRewardTime) => {
+        const now = new Date();
+        let timeRemaining = nextRewardTime - now;
+
+        if (timeRemaining < 0) {
+            nextRewardTime.setDate(nextRewardTime.getDate() + 1);
+            timeRemaining = nextRewardTime - now;
+        }
+
+        const hours = Math.floor(timeRemaining / 3600000);
+        const minutes = Math.floor((timeRemaining % 3600000) / 60000);
+        const seconds = Math.floor((timeRemaining % 60000) / 1000);
+
+        dailyRewardTimer.textContent = `До награды: ${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+
+        setTimeout(() => updateDailyRewardTimer(nextRewardTime), 1000);
+    };
+
     upgradeClickButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 50) {
-            clickCounts[currentCoin] -= 50;
-            clickUpgrades[currentCoin]++;
+        const cost = clickUpgrades[currentCoin] * 50;
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
+            clickUpgrades[currentCoin] += 1;
+            upgradeClickButton.textContent = `Прокачка кликов (+${clickUpgrades[currentCoin]}) - ${clickUpgrades[currentCoin] * 50}`;
             clickCounter.textContent = clickCounts[currentCoin];
             saveGame();
         }
     });
 
     upgradeEnergyButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 3000) {
-            clickCounts[currentCoin] -= 3000;
+        const cost = (maxEnergy / 500) * 3000;
+        if (clickCounts[currentCoin] >= cost) {
+            clickCounts[currentCoin] -= cost;
             maxEnergy += 500;
-            energy = maxEnergy; // Restore energy to max
+            upgradeEnergyButton.textContent = `Прокачка энергии (+500) - ${(maxEnergy / 500) * 3000}`;
+            clickCounter.textContent = clickCounts[currentCoin];
             updateEnergyBar();
             saveGame();
         }
     });
 
-    reduceRegenerationButton.addEventListener("click", () => {
-        if (clickCounts[currentCoin] >= 2000) {
-            clickCounts[currentCoin] -= 2000;
-            regenTime = Math.max(500, regenTime - 100); // Decrease regeneration time
+    reduceRegenButton.addEventListener("click", () => {
+        const cost = regenUpgrades[currentCoin] * 1000 + 2000;
+        if (clickCounts[currentCoin] >= cost && regenTime > 1000) {
+            clickCounts[currentCoin] -= cost;
+            regenUpgrades[currentCoin] += 1;
+            regenTime -= 100; // Уменьшение времени на 0.1 сек
+            reduceRegenButton.textContent = `Уменьшение регенерации (на ${regenUpgrades[currentCoin] * 0.1} сек) - ${regenUpgrades[currentCoin] * 1000 + 2000}`;
+            clickCounter.textContent = clickCounts[currentCoin];
             saveGame();
         }
     });
-
     document.querySelectorAll('.change-option').forEach(button => {
         button.addEventListener('click', () => {
             const newCoin = button.getAttribute('data-image');
@@ -146,35 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    resetProgressButton.addEventListener('click', () => {
-        if (confirm("Вы уверены, что хотите удалить весь прогресс? Это действие необратимо.")) {
-            localStorage.clear();
-            clickCounts = {
-                coin1: 0,
-                coin2: 0,
-                coin3: 0,
-                coin4: 0
-            };
-            clickUpgrades = {
-                coin1: 1,
-                coin2: 1,
-                coin3: 1,
-                coin4: 1
-            };
-            regenUpgrades = {
-                coin1: 0,
-                coin2: 0,
-                coin3: 0,
-                coin4: 0
-            };
-            maxEnergy = 2000;
-            energy = 2000;
-            currentCoin = "coin1";
-            clickCounter.textContent = clickCounts[currentCoin];
-            updateEnergyBar();
-            saveGame();
-        }
-    });
+    loadGame();
+    checkDailyReward();
 
     setInterval(() => {
         if (energy < maxEnergy) {
@@ -184,4 +231,13 @@ document.addEventListener("DOMContentLoaded", () => {
     }, Math.max(regenTime, 1000)); // Ensure the interval doesn't go below 1 second
 
     loadGame();
-});
+    document.addEventListener('touchstart', function(event) {
+        if (event.touches.length > 1) {
+            event.preventDefault();
+        }
+    }, { passive: false });
+
+    document.addEventListener('dblclick', function(event) {
+        event.preventDefault();
+    }, { passive: false });
+});s
