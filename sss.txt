@@ -40,6 +40,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     let currentCoin = "coin1";
 
+    // Изначально скрываем меню
+    changeMenu.classList.add("hidden");
+    storeMenu.classList.add("hidden");
+
     const updateEnergyBar = () => {
         const percentage = (energy / maxEnergy) * 100;
         energyFill.style.width = `${percentage}%`;
