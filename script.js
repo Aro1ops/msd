@@ -12,7 +12,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const upgradeClickButton = document.getElementById("upgrade-click");
     const upgradeEnergyButton = document.getElementById("upgrade-energy");
     const reduceRegenButton = document.getElementById("reduce-regeneration");
-    const dailyRewardTimer = document.getElementById("daily-reward-timer");
 
     let clickCount = 0;
     let energy = 2000;
@@ -240,4 +239,4 @@ document.addEventListener("DOMContentLoaded", () => {
     document.addEventListener('dblclick', function(event) {
         event.preventDefault();
     }, { passive: false });
-});s
+});
