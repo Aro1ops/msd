@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", () => {
     const coinImage = document.getElementById("coin-image");
     const clickCounter = document.getElementById("click-counter");
