@@ -8,6 +8,8 @@ body {
     height: 100vh;
     font-family: Arial, sans-serif;
     background-color: #f0f0f0;
+    user-select: none; /* Отключает выделение текста */
+    -webkit-user-select: none;
 }
 
 #coin-image {
@@ -85,7 +87,7 @@ button:hover {
 }
 
 .change-option {
-    
+
     align-items: center;
     margin: 5px;
     padding: 10px;
