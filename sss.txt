@@ -1,30 +1,375 @@
+Чтобы реализовать ваши требования, нужно внести изменения в код HTML, CSS и JavaScript. Вот шаги, которые нужно выполнить:
+
+### 1. Изменение HTML
+
+Добавим кнопку профиля, кнопки для ввода промокода и окна разработчика, а также сделаем изменения в существующих элементах.
+
+```html
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clicker Game</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="energy-bar">
+        <div id="energy-fill" class="energy-fill"></div>
+        <div id="energy-label" class="energy-label">2000 / 2000</div>
+    </div>
+    <div id="click-counter">0</div>
+    <img id="coin-image" src="coin1.png" alt="Coin Image">
+    <button id="change-button">Изменить</button>
+    <button id="store-button">Магазин</button>
+    <button id="profile-button">Профиль</button>
+    
+    <div id="change-menu" class="hidden">
+        <button id="back-button">Назад ←</button>
+        <button class="change-option" data-image="coin1.png">
+            <img src="coin1.png" alt="Coin 1" width="50"> Монета 1
+        </button>
+        <button class="change-option" data-image="coin2.png">
+            <img src="coin2.png" alt="Coin 2" width="50"> Монета 2
+        </button>
+        <button class="change-option" data-image="coin3.png">
+            <img src="coin3.png" alt="Coin 3" width="50"> Монета 3
+        </button>
+        <button class="change-option" data-image="coin4.png">
+            <img src="coin4.png" alt="Coin 4" width="50"> Монета 4
+        </button>
+    </div>
+    
+    <div id="store-menu" class="hidden">
+        <button id="upgrade-click">Прокачка кликов (+1) - 50</button>
+        <button id="upgrade-energy">Прокачка энергии (+500) - 3000</button>
+        <button id="reduce-regeneration">Уменьшение регенерации (на 0.1 сек) - 2000</button>
+        <button id="back-store-button">Назад ←</button>
+    </div>
+    
+    <div id="profile-menu" class="hidden">
+        <button id="back-profile-button">Назад ←</button>
+        <h2 id="player-nickname">Ник: <span id="nickname"></span></h2>
+        <div id="upgrades-list"></div>
+        <button id="referral-button">Реферальная ссылка</button>
+    </div>
+    
+    <div id="promo-code-menu" class="hidden">
+        <button id="back-promo-button">Назад ←</button>
+        <h3>Введите промокод:</h3>
+        <input type="text" id="promo-input" />
+        <button id="check-promo-button">Проверить</button>
+        <div id="promo-message"></div>
+    </div>
+
+    <div id="developer-mode" class="hidden">
+        <button id="back-dev-button">Назад ←</button>
+        <h3>Режим разработчика</h3>
+        <input type="text" id="promo-input-dev" placeholder="Введите промокод для режима" />
+        <button id="save-promo-code">Добавить промокод на монеты</button>
+        <input type="text" id="coins-amount" placeholder="Количество монет" />
+        <button id="give-coins">Выдать монеты</button>
+        <button id="max-energy">Восстановить энергию</button>
+        <button id="reset-all">Сбросить все</button>
+        <div id="player-list"></div>
+    </div>
+    
+    <div id="daily-reward-timer">До награды: --:--:--</div>
+    <script src="script.js"></script>
+</body>
+</html>
+```
+
+### 2. Изменение CSS
+
+Добавим стили для нового интерфейса:
+
+```css
+body {
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    user-select: none;
+}
+
+#coin-image {
+    width: 80%;
+    height: auto;
+    cursor: pointer;
+    margin-top: 20px;
+}
+
+#click-counter {
+    font-size: 2rem;
+    margin-top: 10px;
+}
+
+.energy-bar {
+    width: 80%;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+    margin: 20px 0;
+    position: relative;
+}
+
+.energy-fill {
+    width: 100%;
+    height: 100%;
+    background-color: #76c7c0;
+}
+
+.energy-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    font-weight: bold;
+}
+
+button {
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+.hidden {
+    display: none;
+}
+
+.click-animation {
+    position: absolute;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: green;
+    pointer-events: none;
+    animation: clickAnim 1s forwards;
+}
+
+@keyframes clickAnim {
+    0% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    100% {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+}
+
+.change-option {
+    display: flex;
+    align-items: center;
+    margin: 5px;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.change-option img {
+    margin-right: 10px;
+}
+```
+
+### 3. Изменение JavaScript
+
+Теперь реализуем логику для новых функций, таких как профиль, промокоды и режим разработчика.
+
+```javascript
 document.addEventListener("DOMContentLoaded", () => {
-    // Сохранение энергии, если есть сохранённое значение, иначе задаём 3000
-    let energy = JSON.parse(localStorage.getItem("energy")) || 3000; 
-    let maxEnergy = JSON.parse(localStorage.getItem("maxEnergy")) || 3000;
+    const coinImage = document.getElementById("coin-image");
+    const clickCounter = document.getElementById("click-counter");
+    const energyFill = document.getElementById("energy-fill");
+    const energyLabel = document.getElementById("energy-label");
+    const changeButton = document.getElementById("change-button");
+    const storeButton = document.getElementById("store-button");
+    const profileButton = document.getElementById("profile-button");
+    const changeMenu = document.getElementById("change-menu");
+    const storeMenu = document.getElementById("store-menu");
+    const profileMenu = document.getElementById("profile-menu");
+    const promoCodeMenu = document.getElementById("promo-code-menu");
+    const developerMode = document.getElementById("developer-mode");
+    const backButton = document.getElementById("back-button");
+    const backStoreButton = document.getElementById("back-store-button");
+    const backProfileButton = document.getElementById("back-profile-button");
+    const backPromoButton = document.getElementById("back-promo-button");
+    const backDevButton = document.getElementById("back-dev-button");
+    const upgradeClickButton = document.getElementById("upgrade-click");
+    const upgradeEnergyButton = document.getElementById("upgrade-energy");
+    const reduceRegenButton = document.getElementById("reduce-regeneration");
+    const nicknameDisplay = document.getElementById("nickname");
+    const promoInput = document.getElementById("promo-input");
+    const checkPromoButton = document.getElementById("check-promo-button");
+    const promoMessage = document.getElementById("promo-message");
+    const savePromoCodeButton = document.getElementById("save-promo-code");
+    const coinsAmountInput = document.getElementById("coins-amount");
+    const giveCoinsButton = document.getElementById("give-coins");
+    const maxEnergyButton = document.getElementById("max-energy");
+    const resetAllButton = document.getElementById("reset-all");
+    const playerList = document.getElementById("player-list");
 
-    // Обновление полоски энергии
-    const updateEnergyBar = () => {
-        // Если энергия больше максимального значения, устанавливаем значение равным maxEnergy
-        if (energy > maxEnergy) {
-            energy = maxEnergy;
-        }
-
-        // Процент заполненности полоски энергии
-        const percentage = (energy / maxEnergy) * 100;
-        energyFill.style.width = `${percentage}%`;
-        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    let clickCount = 0;
+    let energy = 2000;
+    let maxEnergy = 2000;
+    let clickValue = 1;
+    let regenTime = 10000;
+    const clickCounts = JSON.parse(localStorage.getItem("clickCounts")) || {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
+    const clickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades")) || {
+        clickPower: 0,
+        energyUpgrade: 0,
+        reduceRegeneration: 0
     };
 
-    // Другие части кода ...
+    function updateEnergy() {
+        energyFill.style.width = (energy / maxEnergy * 100) + "%";
+        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    }
 
-    loadGame();
-    updateEnergyBar();
+    function updateClickCounter() {
+        clickCounter.textContent = clickCount;
+    }
 
-    setInterval(() => {
-        if (energy < maxEnergy) {
-            energy += 1;
-            updateEnergyBar();
+    coinImage.addEventListener("click", () => {
+        if (energy > 0) {
+            clickCount += clickValue;
+            energy -= 1;
+            updateClickCounter();
+            updateEnergy();
+            animateClick();
         }
-    }, Math.max(regenTime, 1000)); // Интервал регенерации
+    });
+
+    function animateClick() {
+        const animation = document.createElement("div");
+        animation.textContent = `+${clickValue}`;
+        animation.className = "click-animation";
+        document.body.appendChild(animation);
+        animation.style.left = `${event.clientX}px`;
+        animation.style.top = `${event.clientY}px`;
+        setTimeout(() => animation.remove(), 1000);
+    }
+
+    changeButton.addEventListener("click", () => {
+        changeMenu.classList.remove("hidden");
+        document.body.style.pointerEvents = "none";
+    });
+
+    backButton.addEventListener("click", () => {
+        changeMenu.classList.add("hidden");
+        document.body.style.pointerEvents = "auto";
+    });
+
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.remove("hidden");
+        document.body.style.pointerEvents = "none";
+    });
+
+    backStoreButton.addEventListener("click", () => {
+        storeMenu.classList.add("hidden");
+        document.body.style.pointerEvents = "auto";
+    });
+
+    profileButton.addEventListener("click", () => {
+        profileMenu.classList.remove("hidden");
+        document.body.style.pointerEvents = "none";
+        nicknameDisplay.textContent = "Игрок"; // пример имени игрока
+        updateUpgradesList();
+    });
+
+    backProfileButton.addEventListener("click", () => {
+        profileMenu.classList.add("hidden");
+        document.body.style.pointerEvents = "auto";
+    });
+
+    checkPromoButton.addEventListener("click", () => {
+        const promoCode = promoInput.value;
+        if (promoCode === "FREECOINS") {
+            clickCount += 100;
+            promoMessage.textContent = "Промокод активирован! +100 монет";
+            updateClickCounter();
+        } else {
+            promoMessage.textContent = "Неверный промокод.";
+        }
+    });
+
+    backPromoButton.addEventListener("click", () => {
+        promoCodeMenu.classList.add("hidden");
+        document.body.style.pointerEvents = "auto";
+    });
+
+    // Установка обработчиков для режима разработчика
+    savePromoCodeButton.addEventListener("click", () => {
+        const promoCode = document.getElementById("promo-input-dev").value;
+        const coinsAmount = parseInt(coinsAmountInput.value, 10);
+        if (promoCode) {
+            localStorage.setItem(`promo-${promoCode}`, coinsAmount);
+            alert(`Промокод ${promoCode} добавлен с количеством монет: ${coinsAmount}`);
+        }
+    });
+
+    giveCoinsButton.addEventListener("click", () => {
+        const amount = parseInt(coinsAmountInput.value, 10);
+        clickCount += amount;
+        updateClickCounter();
+    });
+
+    maxEnergyButton.addEventListener("click", () => {
+        energy = maxEnergy;
+        updateEnergy();
+    });
+
+    resetAllButton.addEventListener("click", () => {
+        localStorage.clear();
+        clickCount = 0;
+        energy = maxEnergy;
+        updateClickCounter();
+        updateEnergy();
+        alert("Все данные сброшены.");
+    });
+
+    function updateUpgradesList() {
+        const upgradesList = document.getElementById("upgrades-list");
+        upgradesList.innerHTML = `
+            <div>Прокачка кликов: ${clickUpgrades.clickPower}</div>
+            <div>Прокачка энергии: ${clickUpgrades.energyUpgrade}</div>
+            <div>Уменьшение регенерации: ${clickUpgrades.reduceRegeneration}</div>
+        `;
+    }
+    
+    // Загрузка сохраненных данных
+    clickCount = parseInt(localStorage.getItem("clickCount")) || 0;
+    energy = parseInt(localStorage.getItem("energy")) || maxEnergy;
+    updateClickCounter();
+    updateEnergy();
 });
+```
+
+### 4. Общие замечания
+
+- Убедитесь, что все изображения (`coin1.png`, `coin2.png`, `coin3.png`, `coin4.png`) доступны в директории вашего проекта.
+- Проверьте работу функций и интерфейса, и при необходимости внесите изменения для улучшения взаимодействия с пользователем.
+
+Теперь у вас есть обновленная версия игры с дополнительными функциями для управления профилем, магазином, промокодами и режимом разработчика!
