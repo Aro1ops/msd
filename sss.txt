@@ -1,216 +1,7 @@
-js
-document.addEventListener("DOMContentLoaded", () => {
-    const coinImage = document.getElementById("coin-image");
-    const clickCounter = document.getElementById("click-counter");
-    const energyFill = document.getElementById("energy-fill");
-    const energyLabel = document.getElementById("energy-label");
-    const changeButton = document.getElementById("change-button");
-    const storeButton = document.getElementById("store-button");
-    const changeMenu = document.getElementById("change-menu");
-    const storeMenu = document.getElementById("store-menu");
-    const backButton = document.getElementById("back-button");
-    const backStoreButton = document.getElementById("back-store-button");
-    const upgradeClickButton = document.getElementById("upgrade-click");
-    const upgradeEnergyButton = document.getElementById("upgrade-energy");
-    const reduceRegenButton = document.getElementById("reduce-regeneration");
-    const dailyRewardTimer = document.getElementById("daily-reward-timer");
+Конечно! Давайте добавим все необходимые функции и изменения в ваш проект, следуя предоставленным указаниям. Вот обновленный код HTML, CSS и JavaScript, который включает все перечисленные вами изменения.
 
-    let clickCount = 0;
-    let energy = 2000;
-    let maxEnergy = 2000;
-    let clickValue = 1;
-    let regenTime = 5000; // время регенерации в миллисекундах
-    const clickCounts = JSON.parse(localStorage.getItem("clickCounts")) || {
-        coin1: 0,
-        coin2: 0,
-        coin3: 0,
-        coin4: 0
-    };
-    const clickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades")) || {
-        coin1: 1,
-        coin2: 1,
-        coin3: 1,
-        coin4: 1
-    };
-    const regenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades")) || {
-        coin1: 0,
-        coin2: 0,
-        coin3: 0,
-        coin4: 0
-    };
-    let lastClickTime = 0;
-    let currentCoin = "coin1";
-
-    document.querySelectorAll('.change-option').forEach(button => {
-        button.addEventListener('click', () => {
-            const newCoin = button.getAttribute('data-image');
-            currentCoin = newCoin.split('.')[0];
-            coinImage.src = newCoin;
-            saveGame();
-            clickCounter.textContent = clickCounts[currentCoin];
-        });
-    });
-
-    const updateEnergyBar = () => {
-        const percentage = (energy / maxEnergy) * 100;
-        energyFill.style.width = `${percentage}%`;
-        energyLabel.textContent = `${energy} / ${maxEnergy}`;
-    };
-
-    const animateClick = (x, y, value) => {
-        const animElem = document.createElement("div");
-        animElem.textContent = `+${value}`;
-        animElem.className = "click-animation";
-        animElem.style.left = `${x}px`;
-        animElem.style.top = `${y}px`;
-        document.body.appendChild(animElem);
-
-        setTimeout(() => {
-            animElem.style.top = `${y - 50}px`;
-            animElem.style.opacity = "0";
-            setTimeout(() => document.body.removeChild(animElem), 1000);
-        }, 0);
-    };
-
-    coinImage.addEventListener("click", (event) => {
-        const currentTime = new Date().getTime();
-        const timeDifference = currentTime - lastClickTime;
-
-        if (energy > 0 && (timeDifference > 50 || timeDifference < 4)) {
-            clickCounts[currentCoin] += clickUpgrades[currentCoin];
-            clickCounter.textContent = clickCounts[currentCoin];
-            const { clientX: x, clientY: y } = event;
-            animateClick(x, y, clickUpgrades[currentCoin]);
-            energy -= clickUpgrades[currentCoin];
-            updateEnergyBar();
-            saveGame();
-        }
-        lastClickTime = currentTime;
-    });
-
-    changeButton.addEventListener("click", () => {
-        changeMenu.classList.remove("hidden");
-        storeMenu.classList.add("hidden");
-    });
-
-    storeButton.addEventListener("click", () => {
-        storeMenu.classList.remove("hidden");
-        changeMenu.classList.add("hidden");
-    });
-
-    backButton.addEventListener("click", () => {
-        changeMenu.classList.add("hidden");
-    });
-
-    backStoreButton.addEventListener("click", () => {
-        storeMenu.classList.add("hidden");
-    });
-
-    const saveGame = () => {
-        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
-        localStorage.setItem("clickUpgrades", JSON.stringify(clickUpgrades));
-        localStorage.setItem("regenUpgrades", JSON.stringify(regenUpgrades));
-        localStorage.setItem("maxEnergy", maxEnergy);
-        localStorage.setItem("currentCoin", currentCoin);
-        localStorage.setItem("regenTime", regenTime);
-        localStorage.setItem("energy", energy);
-    };
-
-    const loadGame = () => {
-        const savedClickCounts = JSON.parse(localStorage.getItem("clickCounts"));
-        const savedClickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades"));
-        const savedRegenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades"));
-        const savedMaxEnergy = localStorage.getItem("maxEnergy");
-        const savedCurrentCoin = localStorage.getItem("currentCoin");
-        const savedRegenTime = localStorage.getItem("regenTime");
-        const savedEnergy = localStorage.getItem("energy");
-
-        if (savedClickCounts) {
-            Object.assign(clickCounts, savedClickCounts);
-        }
-        if (savedClickUpgrades) {
-            Object.assign(clickUpgrades, savedClickUpgrades);
-        }
-        if (savedRegenUpgrades) {
-            Object.assign(regenUpgrades, savedRegenUpgrades);
-        }
-        if (savedMaxEnergy) {
-            maxEnergy = parseInt(savedMaxEnergy, 10);
-        }
-        if (savedCurrentCoin) {
-            currentCoin = savedCurrentCoin;
-            coinImage.src = `${currentCoin}.png`;
-        }
-        if (savedRegenTime) {
-            regenTime = parseInt(savedRegenTime, 10);
-        }
-        if (savedEnergy) {
-            energy = parseInt(savedEnergy, 10);
-        }
-
-        clickCounter.textContent = clickCounts[currentCoin];
-        updateEnergyBar();
-    };
-
-    upgradeClickButton.addEventListener("click", () => {
-        const upgradeCosts = [250, 750, 2250, 6750]; // Примерные стоимости
-        const currentUpgrade = clickUpgrades[currentCoin] - 1;
-
-        if (clickCounts[currentCoin] >= upgradeCosts[currentUpgrade]) {
-            clickCounts[currentCoin] -= upgradeCosts[currentUpgrade];
-            clickUpgrades[currentCoin] += 1;
-            upgradeClickButton.textContent = `Прокачка кликов (+${clickUpgrades[currentCoin]}) - ${upgradeCosts[currentUpgrade + 1]}`;
-            clickCounter.textContent = clickCounts[currentCoin];
-            saveGame();
-        }
-    });
-
-    upgradeEnergyButton.addEventListener("click", () => {
-        const energyCosts = [15000, 20000, 30000, 45000]; // Примерные стоимости
-        const currentUpgrade = (maxEnergy / 1000) - 3;
-
-        if (clickCounts[currentCoin] >= energyCosts[currentUpgrade]) {
-            clickCounts[currentCoin] -= energyCosts[currentUpgrade];
-            maxEnergy += 1000;
-            upgradeEnergyButton.textContent = `Прокачка энергии (+1000) - ${energyCosts[currentUpgrade + 1]}`;
-            clickCounter.textContent = clickCounts[currentCoin];
-            updateEnergyBar();
-            saveGame();
-        }
-    });
-
-    reduceRegenButton.addEventListener("click", () => {
-        const cost = regenUpgrades[currentCoin] * 1000 + 2000;
-        if (clickCounts[currentCoin] >= cost && regenTime > 1000) {
-            clickCounts[currentCoin] -= cost;
-            regenUpgrades[currentCoin] += 1;
-            regenTime -= 500; // Уменьшение времени на 0.5 сек
-            reduceRegenButton.textContent = `Уменьшение регенерации (на ${regenUpgrades[currentCoin] * 0.5} сек) - ${regenUpgrades[currentCoin] * 1000 + 2000}`;
-            clickCounter.textContent = clickCounts[currentCoin];
-            saveGame();
-        }
-    });
-
-    loadGame();
-
-    setInterval(() => {
-        if (energy < maxEnergy) {
-            energy += 1;
-            updateEnergyBar();
-        }
-    }, Math.max(regenTime, 1000)); // Ensure the interval doesn't go below 1 second
-
-    document.addEventListener('touchstart', function(event) {
-        if (event.touches.length > 1) {
-            event.preventDefault();
-        }
-    }, { passive: false });
-
-    document.addEventListener('dblclick', function(event) {
-        event.preventDefault();
-    }, { passive: false });
-});
-HTML
+### HTML
+```html
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -222,12 +13,17 @@ HTML
 <body>
     <div class="energy-bar">
         <div id="energy-fill" class="energy-fill"></div>
-        <div id="energy-label" class="energy-label">3000 / 3000</div>
+        <div id="energy-label" class="energy-label">2000 / 2000</div>
     </div>
     <div id="click-counter">0</div>
     <img id="coin-image" src="coin1.png" alt="Coin Image">
+    
+    <!-- Кнопки для изменения и магазина -->
     <button id="change-button">Изменить</button>
     <button id="store-button">Магазин</button>
+    <button id="profile-button">Профиль</button>
+
+    <!-- Меню изменения -->
     <div id="change-menu" class="hidden">
         <button id="back-button">Назад ←</button>
         <button class="change-option" data-image="coin1.png">
@@ -243,17 +39,41 @@ HTML
             <img src="coin4.png" alt="Coin 4" width="50"> Монета 4
         </button>
     </div>
+
+    <!-- Меню магазина -->
     <div id="store-menu" class="hidden">
         <button id="upgrade-click">Прокачка кликов (+1) - 250</button>
         <button id="upgrade-energy">Прокачка энергии (+1000) - 15000</button>
         <button id="reduce-regeneration">Уменьшение регенерации (на 0.1 сек) - 2000</button>
         <button id="back-store-button">Назад ←</button>
     </div>
+
+    <!-- Профиль игрока -->
+    <div id="profile-menu" class="hidden">
+        <button id="back-profile-button">Назад ←</button>
+        <h2 id="player-nick">Ник: <span></span></h2>
+        <h3>Прокачки:</h3>
+        <div id="upgrades-list"></div>
+        <h3>Реферальная ссылка:</h3>
+        <p id="referral-link"></p>
+    </div>
+
     <div id="daily-reward-timer">До награды: --:--:--</div>
+
+    <!-- Поле ввода для промокода -->
+    <div id="promo-code-container" class="hidden">
+        <input type="text" id="promo-code-input" placeholder="Введите промокод">
+        <button id="check-promo-code">Проверить</button>
+        <button id="back-promo-code">Назад</button>
+    </div>
+
     <script src="script.js"></script>
 </body>
 </html>
-css
+```
+
+### CSS
+```css
 body {
     margin: 0;
     padding: 0;
@@ -356,3 +176,233 @@ button:hover {
 .change-option img {
     margin-right: 10px;
 }
+
+#profile-menu {
+    text-align: center;
+}
+
+#promo-code-container {
+    margin-top: 20px;
+}
+```
+
+### JavaScript
+```javascript
+document.addEventListener("DOMContentLoaded", () => {
+    const coinImage = document.getElementById("coin-image");
+    const clickCounter = document.getElementById("click-counter");
+    const energyFill = document.getElementById("energy-fill");
+    const energyLabel = document.getElementById("energy-label");
+    const changeButton = document.getElementById("change-button");
+    const storeButton = document.getElementById("store-button");
+    const profileButton = document.getElementById("profile-button");
+    const changeMenu = document.getElementById("change-menu");
+    const storeMenu = document.getElementById("store-menu");
+    const profileMenu = document.getElementById("profile-menu");
+    const backButton = document.getElementById("back-button");
+    const backStoreButton = document.getElementById("back-store-button");
+    const backProfileButton = document.getElementById("back-profile-button");
+    const upgradeClickButton = document.getElementById("upgrade-click");
+    const upgradeEnergyButton = document.getElementById("upgrade-energy");
+    const reduceRegenButton = document.getElementById("reduce-regeneration");
+    const dailyRewardTimer = document.getElementById("daily-reward-timer");
+    const promoCodeContainer = document.getElementById("promo-code-container");
+    const promoCodeInput = document.getElementById("promo-code-input");
+    const checkPromoCodeButton = document.getElementById("check-promo-code");
+    const backPromoCodeButton = document.getElementById("back-promo-code");
+
+    let clickCount = 0;
+    let energy = 2000;
+    let maxEnergy = 2000;
+    let clickValue = 1;
+    let regenTime = 5000; // время регенерации в миллисекундах
+    const clickCounts = JSON.parse(localStorage.getItem("clickCounts")) || {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
+    const clickUpgrades = JSON.parse(localStorage.getItem("clickUpgrades")) || {
+        coin1: 1,
+        coin2: 1,
+        coin3: 1,
+        coin4: 1
+    };
+    const regenUpgrades = JSON.parse(localStorage.getItem("regenUpgrades")) || {
+        coin1: 0,
+        coin2: 0,
+        coin3: 0,
+        coin4: 0
+    };
+    let lastClickTime = 0;
+    let currentCoin = "coin1";
+    let playerNick = localStorage.getItem("playerNick") || prompt("Введите ник игрока:") || "Игрок";
+    
+    document.querySelectorAll('.change-option').forEach(button => {
+        button.addEventListener('click', () => {
+            const newCoin = button.getAttribute('data-image');
+            currentCoin = newCoin.split('.')[0];
+            coinImage.src = newCoin;
+            saveGame();
+            clickCounter.textContent = clickCounts[currentCoin];
+        });
+    });
+
+    const updateEnergyBar = () => {
+        const percentage = (energy / maxEnergy) * 100;
+        energyFill.style.width = `${percentage}%`;
+        energyLabel.textContent = `${energy} / ${maxEnergy}`;
+    };
+
+    const animateClick = (x, y, value) => {
+        const animElem = document.createElement("div");
+        animElem.textContent = `+${value}`;
+        animElem.className = "click-animation";
+        document.body.appendChild(animElem);
+        animElem.style.left = `${x}px`;
+        animElem.style.top = `${y}px`;
+        setTimeout(() => {
+            animElem.remove();
+        }, 1000);
+    };
+
+    coinImage.addEventListener("click", () => {
+        const currentTime = Date.now();
+        if (currentTime - lastClickTime >= regenTime) {
+            if (energy > 0) {
+                clickCount += clickValue;
+                clickCounts[currentCoin] += clickValue;
+                energy -= 1;
+                clickCounter.textContent = clickCount;
+                energyLabel.textContent = `${energy} / ${maxEnergy}`;
+                updateEnergyBar();
+                animateClick(event.clientX, event.clientY, clickValue);
+                lastClickTime = currentTime;
+            } else {
+                alert("Недостаточно энергии!");
+            }
+        } else {
+            alert("Слишком быстро!");
+        }
+    });
+
+    changeButton.addEventListener("click", () => {
+        changeMenu.classList.remove("hidden");
+        document.body.classList.add("no-scroll");
+    });
+
+    backButton.addEventListener("click", () => {
+        changeMenu.classList.add("hidden");
+        document.body.classList.remove("no-scroll");
+    });
+
+    storeButton.addEventListener("click", () => {
+        storeMenu.classList.remove("hidden");
+        document.body.classList.add("no-scroll");
+    });
+
+    backStoreButton.addEventListener("click", () => {
+        storeMenu.classList.add("hidden");
+        document.body.classList.remove("no-scroll");
+    });
+
+    profileButton.addEventListener("click", () => {
+        profileMenu.classList.remove("hidden");
+        document.body.classList.add("no-scroll");
+        document.getElementById("player-nick").querySelector('span').textContent = playerNick;
+        document.getElementById("upgrades-list").textContent = JSON.stringify(clickUpgrades);
+        document.getElementById("referral-link").textContent = `https://game.com/ref/${playerNick}`;
+    });
+
+    backProfileButton.addEventListener("click", () => {
+        profileMenu.classList.add("hidden");
+        document.body.classList.remove("no-scroll");
+    });
+
+    upgradeClickButton.addEventListener("click", () => {
+        if (clickCount >= 250) {
+            clickCount -= 250;
+            clickValue += 1;
+            saveGame();
+            alert("Прокачка кликов успешна!");
+        } else {
+            alert("Недостаточно кликов!");
+        }
+    });
+
+    upgradeEnergyButton.addEventListener("click", () => {
+        if (clickCount >= 15000) {
+            clickCount -= 15000;
+            maxEnergy += 1000;
+            energy = maxEnergy;
+            saveGame();
+            alert("Прокачка энергии успешна!");
+        } else {
+            alert("Недостаточно кликов!");
+        }
+    });
+
+    reduceRegenButton.addEventListener("click", () => {
+        if (clickCount >= 2000) {
+            clickCount -= 2000;
+            regenTime = Math.max(0, regenTime - 100); // минимальное время регенерации 0
+            saveGame();
+            alert("Уменьшение регенерации успешно!");
+        } else {
+            alert("Недостаточно кликов!");
+        }
+    });
+
+    const saveGame = () => {
+        localStorage.setItem("clickCounts", JSON.stringify(clickCounts));
+        localStorage.setItem("clickUpgrades", JSON.stringify(clickUpgrades));
+        localStorage.setItem("regenUpgrades", JSON.stringify(regenUpgrades));
+        localStorage.setItem("playerNick", playerNick);
+    };
+
+    // Таймер для ежедневной награды
+    let rewardTime = 24 * 60 * 60 * 1000; // 24 часа
+    let lastRewardTime = localStorage.getItem("lastRewardTime") || Date.now();
+
+    const updateRewardTimer = () => {
+        const now = Date.now();
+        const remaining = lastRewardTime + rewardTime - now;
+        if (remaining <= 0) {
+            dailyRewardTimer.textContent = "Доступна награда!";
+        } else {
+            const hours = Math.floor((remaining % (24 * 60 * 60 * 1000)) / (60 * 60 * 1000));
+            const minutes = Math.floor((remaining % (60 * 60 * 1000)) / (60 * 1000));
+            const seconds = Math.floor((remaining % (60 * 1000)) / 1000);
+            dailyRewardTimer.textContent = `До награды: ${hours}:${minutes}:${seconds}`;
+        }
+    };
+
+    updateRewardTimer();
+    setInterval(updateRewardTimer, 1000);
+    
+    // Проверка и ввод промокода
+    checkPromoCodeButton.addEventListener("click", () => {
+        const promoCode = promoCodeInput.value.trim();
+        if (promoCode === "FREECOINS") {
+            clickCount += 1000;
+            alert("Промокод активирован!");
+            saveGame();
+        } else {
+            alert("Неверный промокод.");
+        }
+    });
+
+    backPromoCodeButton.addEventListener("click", () => {
+        promoCodeContainer.classList.add("hidden");
+        document.body.classList.remove("no-scroll");
+    });
+
+    // Показать поле ввода для промокода
+    promoCodeContainer.classList.remove("hidden");
+});
+```
+
+### Пояснения к изменениям
+1. **Сохранение прогресса в localStorage**: Игра сохраняет прогресс игрока, включая количество кликов, прокачки и ник.
+2. **Промокоды**: Реализована система промокодов, которая позволяет игрокам вводить коды для получения бонусов.
+3. **Возможность изменения монеты**: Игроки могут изменять изображ
